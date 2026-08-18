@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BRYC Financial Dashboard</title>
+<link rel="stylesheet" href="https://use.typekit.net/hte4vgd.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --g0:#061b17;--g1:#034c3d;--g2:#006b56;--g3:#087d65;--g4:#4da08f;--g5:#80bbaf;--g6:#d3ebe7;
+  --b0:#073e7e;--b1:#08458e;--b2:#0a52a9;--b3:#0c6ad9;--b4:#6b94c5;--b5:#86b7f9;--b6:#e7f1fe;
+  --gold:#BF9000;--gold-lt:#FEF6DC;--red:#8B1A1A;--red-lt:#FCEBEB;--amber:#7A4500;
+  --ink:#061b17;--muted:#3a5c55;--faint:#6b8f89;--rule:#c2dbd7;--bg:#f4faf9;--white:#fff;
+  --rad:8px;
+  font-family:proxima-nova,'Helvetica Neue',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-height:100vh;}
+
+/* AUTH */
+#auth-screen{position:fixed;inset:0;background:var(--g0);display:flex;align-items:center;justify-content:center;z-index:999;}
+.auth-box{background:var(--white);border-radius:12px;padding:40px;width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.auth-logo{font-size:30px;font-weight:800;color:var(--g2);letter-spacing:.06em;margin-bottom:2px;}
+.auth-sub{font-size:13px;color:var(--faint);margin-bottom:24px;}
+.auth-security{background:var(--red-lt);border:.5px solid #e0a0a0;border-radius:6px;padding:10px 12px;font-size:12px;color:var(--red);margin-bottom:18px;text-align:left;line-height:1.6;}
+.auth-security strong{font-weight:600;}
+.auth-pin{width:100%;padding:11px 12px;border:1.5px solid var(--rule);border-radius:6px;font-size:16px;text-align:center;letter-spacing:.3em;font-family:proxima-nova,sans-serif;margin-bottom:6px;}
+.auth-pin:focus{outline:2px solid var(--g2);outline-offset:1px;border-color:var(--g2);}
+.auth-err{font-size:12px;color:var(--red);min-height:16px;margin-bottom:8px;}
+.auth-btn{width:100%;padding:11px;background:var(--g2);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;margin-bottom:8px;}
+.auth-btn:hover{background:var(--g3);}
+.auth-btn.v{background:transparent;border:1.5px solid var(--rule);color:var(--muted);}
+.auth-btn.v:hover{border-color:var(--g4);color:var(--g2);}
+
+/* HEADER */
+.hdr{background:var(--g2);padding:0 28px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.hdr-logo{font-size:20px;font-weight:800;color:#fff;letter-spacing:.05em;}
+.hdr-title{font-size:12px;color:rgba(255,255,255,.55);margin-left:14px;}
+.hdr-r{display:flex;align-items:center;gap:10px;}
+.role-pill{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;background:rgba(255,255,255,.15);color:#fff;}
+.signout{font-size:12px;color:rgba(255,255,255,.45);background:none;border:none;cursor:pointer;}
+.signout:hover{color:#fff;}
+
+/* NAV */
+.nav{background:var(--white);border-bottom:1px solid var(--rule);padding:0 28px;display:flex;overflow-x:auto;position:sticky;top:50px;z-index:99;}
+.ntab{padding:13px 17px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;white-space:nowrap;font-family:proxima-nova,sans-serif;transition:all .15s;}
+.ntab:hover{color:var(--ink);}
+.ntab.active{color:var(--g2);border-bottom-color:var(--g2);}
+
+/* PAGES */
+.page{display:none;padding:26px;max-width:1080px;margin:0 auto;}
+.page.active{display:block;}
+
+/* CARDS */
+.card{background:var(--white);border:.5px solid var(--rule);border-radius:var(--rad);padding:18px 22px;margin-bottom:16px;}
+.card-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:14px;}
+
+/* KPI GRID */
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;}
+.kpi{background:var(--white);border:.5px solid var(--rule);border-radius:var(--rad);padding:14px 16px;}
+.kpi-lbl{font-size:11px;color:var(--faint);margin-bottom:5px;}
+.kpi-val{font-size:21px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+.kpi.g .kpi-val{color:var(--g2);}
+.kpi.b .kpi-val{color:var(--b2);}
+.kpi.y .kpi-val{color:var(--gold);}
+.kpi.r .kpi-val{color:var(--red);}
+
+/* TABLES */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);padding:7px 10px;border-bottom:1px solid var(--rule);background:var(--bg);}
+.tbl th.r,.tbl td.r{text-align:right;}
+.tbl td{padding:9px 10px;border-bottom:.5px solid var(--rule);}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl .tot td{font-weight:700;background:var(--bg);}
+.pos{color:var(--g2);}
+.neg{color:var(--red);}
+
+/* BADGES */
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;}
+.badge.g{background:var(--g6);color:var(--g2);}
+.badge.b{background:var(--b6);color:var(--b2);}
+.badge.y{background:var(--gold-lt);color:var(--amber);}
+.badge.r{background:var(--red-lt);color:var(--red);}
+.badge.n{background:var(--bg);color:var(--muted);}
+
+/* SLIDERS */
+.srow{display:flex;align-items:center;gap:12px;margin:9px 0;}
+.srow label{font-size:13px;color:var(--muted);min-width:210px;}
+.srow input[type=range]{flex:1;accent-color:var(--g2);}
+.sval{font-size:13px;font-weight:600;min-width:80px;text-align:right;font-variant-numeric:tabular-nums;}
+
+/* BARS */
+.brow{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12px;}
+.brow .bl{min-width:200px;color:var(--muted);}
+.btrack{flex:1;background:var(--bg);border-radius:3px;height:20px;overflow:hidden;}
+.bfill{height:100%;border-radius:3px;transition:width .3s;}
+.brow .bv{min-width:85px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums;}
+.brow.bdiv{border-top:.5px solid var(--rule);padding-top:8px;margin-top:4px;}
+
+/* VERDICT */
+.verdict{border-radius:var(--rad);padding:12px 16px;margin-top:12px;font-size:13px;}
+
+/* ADMIN PANEL */
+.apanel{background:var(--gold-lt);border:.5px solid var(--gold);border-radius:var(--rad);padding:16px 20px;margin-bottom:16px;}
+.apanel-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:12px;}
+.agrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;}
+.af label{display:block;font-size:11px;color:var(--amber);font-weight:600;margin-bottom:3px;}
+.af input,.af select,.af textarea{width:100%;padding:7px 10px;font-size:13px;border:.5px solid var(--gold);border-radius:5px;background:var(--white);color:var(--ink);font-family:proxima-nova,sans-serif;}
+.af textarea{height:60px;resize:vertical;}
+.af input:focus,.af select:focus,.af textarea:focus{outline:2px solid var(--gold);outline-offset:1px;}
+.abtn{margin-top:10px;padding:7px 18px;background:var(--g2);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;}
+.abtn:hover{background:var(--g3);}
+.saved{font-size:11px;color:var(--g2);margin-left:8px;display:none;}
+
+/* INFO BOXES */
+.info{border-radius:var(--rad);padding:12px 16px;font-size:12px;line-height:1.75;margin-top:10px;}
+.info.blue{background:var(--b6);border:.5px solid var(--b4);color:var(--b0);}
+.info.green{background:var(--g6);border:.5px solid var(--g5);color:var(--g1);}
+.info.amber{background:var(--gold-lt);border:.5px solid #e0c060;color:var(--amber);}
+.info.red{background:var(--red-lt);border:.5px solid #e0a0a0;color:var(--red);}
+.info strong{font-weight:600;}
+
+/* SECTION LABEL */
+.sec{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:18px 0 8px;}
+
+/* PIPELINE */
+.frow{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px;}
+.fchip{padding:5px 11px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:.5px solid var(--rule);background:var(--white);color:var(--muted);transition:all .15s;}
+.fchip:hover,.fchip.on{background:var(--g2);color:#fff;border-color:var(--g2);}
+.pip-grid{display:grid;grid-template-columns:85px 75px 80px 80px 90px 90px 1fr 28px;gap:5px;padding:8px 10px;border-bottom:.5px solid var(--rule);font-size:12px;align-items:center;}
+.pip-head{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);background:var(--bg);border-radius:4px 4px 0 0;}
+.pip-add-row{display:grid;grid-template-columns:85px 75px 80px 80px 90px 90px 1fr 60px;gap:5px;padding:9px 10px;background:var(--g6);border-radius:0 0 6px 6px;}
+.pip-add-row input,.pip-add-row select{padding:5px 7px;font-size:12px;border:.5px solid var(--rule);border-radius:4px;background:var(--white);font-family:proxima-nova,sans-serif;width:100%;}
+.pdel{background:none;border:none;color:var(--faint);cursor:pointer;font-size:13px;line-height:1;}
+.pdel:hover{color:var(--red);}
+
+/* COVERAGE */
+.cov-row{margin:9px 0;}
+.cov-lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:3px;}
+.cov-lbl span:last-child{font-weight:600;color:var(--ink);}
+.cov-track{background:var(--bg);border-radius:3px;height:16px;overflow:hidden;}
+.cov-fill{height:100%;border-radius:3px;transition:width .3s;}
+
+/* WF LOG */
+.wf-entry{border:.5px solid var(--rule);border-radius:var(--rad);padding:14px 16px;margin-bottom:10px;font-size:13px;}
+.wf-date{font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.wf-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
+.wf-field{font-size:12px;color:var(--muted);}
+.wf-field strong{display:block;font-size:13px;font-weight:600;color:var(--ink);}
+.wf-alloc{display:flex;gap:8px;margin-bottom:6px;}
+.wf-alloc-seg{flex:1;height:8px;border-radius:4px;}
+.wf-note{font-size:12px;color:var(--muted);font-style:italic;border-top:.5px solid var(--rule);padding-top:8px;margin-top:8px;}
+
+/* HISTORY */
+.yr-block{margin-bottom:20px;}
+.yr-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;color:#fff;background:var(--g2);padding:3px 10px;border-radius:20px;margin-bottom:8px;}
+.yr-headline{font-size:14px;font-weight:600;margin-bottom:4px;}
+.yr-events{font-size:13px;color:var(--muted);line-height:1.8;}
+.yr-note{font-size:12px;color:var(--faint);font-style:italic;margin-top:6px;padding-left:12px;border-left:2px solid var(--rule);}
+
+/* FOOTNOTE */
+.fn{font-size:11px;color:var(--faint);margin-top:10px;line-height:1.6;}
+
+/* STAR NOTE */
+.star-note{font-size:11px;color:var(--amber);margin-top:6px;}
+
+@media(max-width:640px){
+  .page{padding:14px;}
+  .srow label{min-width:130px;font-size:12px;}
+  .kgrid{grid-template-columns:1fr 1fr;}
+  .pip-grid,.pip-add-row{grid-template-columns:1fr 1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ AUTH ══ -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">BRYC</div>
+    <div class="auth-sub">Financial Dashboard</div>
+    <div class="auth-security">
+      <strong>⚠ Security notice:</strong> Run this file locally (double-click to open in your browser). Do not host on a public GitHub repo — financial data in the HTML source would be visible to anyone with the link. A private repo or local-only use is recommended.
+    </div>
+    <input class="auth-pin" id="pin-in" type="password" placeholder="Admin PIN" maxlength="6">
+    <div class="auth-err" id="auth-err"></div>
+    <button class="auth-btn" onclick="tryAdmin()">Sign in as Admin</button>
+    <button class="auth-btn v" onclick="enterViewer()">View only (no editing)</button>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app" style="display:none">
+  <header class="hdr">
+    <div style="display:flex;align-items:center;">
+      <div class="hdr-logo">BRYC</div>
+      <div class="hdr-title">Financial Dashboard</div>
+    </div>
+    <div class="hdr-r">
+      <span class="role-pill" id="role-pill">Viewer</span>
+      <button class="signout" onclick="signOut()">Sign out</button>
+    </div>
+  </header>
+  <nav class="nav">
+    <button class="ntab active" onclick="go('dashboard',this)">Dashboard</button>
+    <button class="ntab" onclick="go('cash',this)">Cash position</button>
+    <button class="ntab" onclick="go('investments',this)">Investments</button>
+    <button class="ntab" onclick="go('pipeline',this)">Pipeline</button>
+    <button class="ntab" onclick="go('forecast',this)">Forecast</button>
+    <button class="ntab" onclick="go('history',this)">History</button>
+  </nav>
+
+  <!-- ══════════ DASHBOARD ══════════ -->
+  <div class="page active" id="page-dashboard">
+    <div class="kgrid">
+      <div class="kpi g"><div class="kpi-lbl">Chase cash</div><div class="kpi-val" id="d-chase">—</div><div class="kpi-sub">Operating account</div></div>
+      <div class="kpi g"><div class="kpi-lbl">Liquid reserves (MMs)</div><div class="kpi-val" id="d-liq">—</div><div class="kpi-sub">Accts 7413 + 4912</div></div>
+      <div class="kpi b"><div class="kpi-lbl">Endowment</div><div class="kpi-val" id="d-end">—</div><div class="kpi-sub">Board-designated (see note)</div></div>
+      <div class="kpi" style="border-left:3px solid var(--g2)"><div class="kpi-lbl">Pipeline — conservative</div><div class="kpi-val" id="d-pc">—</div><div class="kpi-sub">Lower estimate, all leads</div></div>
+      <div class="kpi" style="border-left:3px solid var(--b2)"><div class="kpi-lbl">Pipeline — optimistic</div><div class="kpi-val" id="d-po">—</div><div class="kpi-sub">Upper estimate, all leads</div></div>
+      <div class="kpi y"><div class="kpi-lbl">Months covered</div><div class="kpi-val" id="d-mo">—</div><div class="kpi-sub">Chase + MMs vs. burn</div></div>
+    </div>
+
+    <div class="info amber" style="margin-bottom:14px;">
+      <strong>What is "Board-designated endowment"?</strong> BRYC's endowment account (8805-0682) is set aside by board decision — not legally restricted by donors. That means the board <em>can</em> vote to access the principal if needed, but it requires a formal board vote. It's not like a checking account you can draw from freely. Think of it as a last-resort backstop, not day-to-day liquidity.
+    </div>
+
+    <div class="card">
+      <div class="card-title">Runway — how long can we operate?</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Adjust the monthly burn rate below to see how many months each reserve tier covers. Red line = 6-month sector minimum. Blue dashed = 8-month BRYC target.</p>
+      <div class="srow"><label>Monthly burn rate ($)</label><input type="range" id="db-burn" min="150000" max="450000" step="5000" value="290000" oninput="updateDash()"><span class="sval" id="db-burn-v">$290K</span></div>
+      <div style="margin-top:14px;">
+        <div class="cov-row"><div class="cov-lbl"><span>Chase only</span><span id="rc-chase">—</span></div><div class="cov-track"><div class="cov-fill" id="rcf-chase" style="background:var(--g5)"></div></div></div>
+        <div class="cov-row"><div class="cov-lbl"><span>Chase + MM operating reserves</span><span id="rc-mm">—</span></div><div class="cov-track"><div class="cov-fill" id="rcf-mm" style="background:var(--g2)"></div></div></div>
+        <div class="cov-row"><div class="cov-lbl"><span>Chase + MMs + endowment (board vote required)</span><span id="rc-all">—</span></div><div class="cov-track"><div class="cov-fill" id="rcf-all" style="background:var(--b2)"></div></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Pipeline by lead</div>
+      <div id="d-pip-summary"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ CASH POSITION ══════════ -->
+  <div class="page" id="page-cash">
+    <div class="info blue" style="margin-bottom:14px;">
+      <strong>How to use this tab:</strong> Update the fields below after each bank statement or when you get a significant balance update. The cash flow model lets you pick a window (e.g. 3 months) and see how your cash position looks after expected revenue comes in and expenses go out. <strong>Chase cash + debt:</strong> pull from your Chase statement. <strong>Debt / obligations:</strong> includes any outstanding AP, payroll liabilities, and <strong>credit card balances</strong> not yet paid.
+    </div>
+
+    <div id="cash-admin" style="display:none">
+      <div class="apanel">
+        <div class="apanel-title">✏ Update cash balances — Admin only</div>
+        <div class="agrid">
+          <div class="af"><label>Chase operating cash ($)</label><input id="a-chase" type="number" placeholder="e.g. 834117"></div>
+          <div class="af"><label>Current debt + credit card balances ($)</label><input id="a-debt" type="number" placeholder="e.g. 67078"></div>
+          <div class="af"><label>Statement / as-of date</label><input id="a-chase-dt" type="date"></div>
+        </div>
+        <button class="abtn" onclick="saveCash()">Save</button><span class="saved" id="cash-saved">✓ Saved</span>
+      </div>
+    </div>
+
+    <div class="kgrid">
+      <div class="kpi g"><div class="kpi-lbl">Chase cash</div><div class="kpi-val" id="cp-chase">—</div><div class="kpi-sub" id="cp-dt">As of statement date</div></div>
+      <div class="kpi r"><div class="kpi-lbl">Debt + credit cards</div><div class="kpi-val" id="cp-debt">—</div><div class="kpi-sub">All outstanding obligations</div></div>
+      <div class="kpi g"><div class="kpi-lbl">Net liquid cash</div><div class="kpi-val" id="cp-net">—</div><div class="kpi-sub">Chase minus all obligations</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Cash flow model</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Set the number of months you want to model, your expected monthly expenses, and anticipated revenue for the period. The tool shows your projected ending cash position.</p>
+      <div class="srow"><label>Months to model</label><input type="range" id="cf-mo" min="1" max="12" step="1" value="3" oninput="updateCF()"><span class="sval" id="cf-mo-v">3 mo</span></div>
+      <div class="srow"><label>Monthly expenses ($)</label><input type="range" id="cf-exp" min="150000" max="450000" step="5000" value="290000" oninput="updateCF()"><span class="sval" id="cf-exp-v">$290K</span></div>
+      <div class="srow"><label>Anticipated revenue — period total ($)</label><input type="range" id="cf-rev" min="0" max="2000000" step="10000" value="633000" oninput="updateCF()"><span class="sval" id="cf-rev-v">$633K</span></div>
+      <div class="srow"><label>Confirmed additional revenue ($)</label><input type="range" id="cf-extra" min="0" max="500000" step="5000" value="160000" oninput="updateCF()"><span class="sval" id="cf-extra-v">$160K</span></div>
+      <div style="margin-top:14px;" id="cf-bars"></div>
+      <div class="verdict" id="cf-verdict"></div>
+      <p class="fn">Confirmed additional revenue is treated as certain regardless of the anticipated revenue figure — it doesn't scale with confidence adjustments in the Forecast tab.</p>
+    </div>
+  </div>
+
+  <!-- ══════════ INVESTMENTS ══════════ -->
+  <div class="page" id="page-investments">
+    <div class="info blue" style="margin-bottom:14px;">
+      <strong>How to use this tab:</strong> Update balances monthly after your WF statement arrives, or after Kevin sends an off-cycle update. The IPS spending policy calculation updates automatically. Log every Kevin update in the "Advisor updates" section below — this creates a running record between formal statements.
+    </div>
+
+    <div id="inv-admin" style="display:none">
+      <div class="apanel">
+        <div class="apanel-title">✏ Update WF account balances — from monthly Combined Snapshot</div>
+        <p style="font-size:12px;color:var(--amber);margin-bottom:10px;"><strong>Where to find these:</strong> Open your WF Combined Snapshot (first pages of statement). The table "What's inside your Combined Snapshot" shows each account's current value. The "Combined portfolio summary" shows Est. Annual Income in the far-right column.</p>
+        <div class="agrid">
+          <div class="af"><label>1005-7413 balance ($) — EBR operating reserve</label><input id="a-mm1" type="number" placeholder="e.g. 537731"></div>
+          <div class="af"><label>8847-4912 balance ($) — yield operating reserve</label><input id="a-mm2" type="number" placeholder="e.g. 1312012"></div>
+          <div class="af"><label>8805-0682 balance ($) — endowment</label><input id="a-end" type="number" placeholder="e.g. 1322973"></div>
+          <div class="af"><label>Est. annual income ($) — bottom of portfolio summary</label><input id="a-eai" type="number" placeholder="e.g. 103627"></div>
+          <div class="af"><label>Statement date</label><input id="a-inv-dt" type="date"></div>
+        </div>
+        <button class="abtn" onclick="saveInv()">Save</button><span class="saved" id="inv-saved">✓ Saved</span>
+      </div>
+    </div>
+
+    <div class="kgrid">
+      <div class="kpi g"><div class="kpi-lbl">1005-7413 (EBR MM)</div><div class="kpi-val" id="iv-mm1">—</div><div class="kpi-sub">3.64% yield · Immediate access</div></div>
+      <div class="kpi g"><div class="kpi-lbl">8847-4912 (yield MM)</div><div class="kpi-val" id="iv-mm2">—</div><div class="kpi-sub">3.64% yield · Immediate access</div></div>
+      <div class="kpi b"><div class="kpi-lbl">8805-0682 (endowment)</div><div class="kpi-val" id="iv-end">—</div><div class="kpi-sub">2.74% yield · Requires board vote</div></div>
+      <div class="kpi"><div class="kpi-lbl">Total portfolio</div><div class="kpi-val" id="iv-tot">—</div><div class="kpi-sub">All three WF accounts</div></div>
+      <div class="kpi"><div class="kpi-lbl">Blended yield</div><div class="kpi-val" id="iv-yield">—</div><div class="kpi-sub">Est. annual income ÷ total value</div></div>
+      <div class="kpi"><div class="kpi-lbl">Est. annual income</div><div class="kpi-val" id="iv-eai">—</div><div class="kpi-sub">WF forward projection</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">How to find the combined yield from your statement</div>
+      <div class="info green">
+        <strong>Step 1:</strong> Open the Combined Snapshot (first few pages of your WF monthly statement).<br>
+        <strong>Step 2:</strong> Find the table labeled <em>"Combined portfolio summary."</em><br>
+        <strong>Step 3:</strong> Look at the bottom row: <em>Asset value</em> = total portfolio. Far-right column = <em>Estimated Ann. Income</em>.<br>
+        <strong>Step 4:</strong> Divide: Est. Annual Income ÷ Asset Value = blended yield. Example: $103,627 ÷ $3,172,715 = <strong>3.27%</strong><br><br>
+        <strong>Important distinction:</strong> The $103K+ estimated income is a <em>taxable income figure</em> that reinvests automatically — it's not cash landing in your Chase account. The actual liquid income earned on just the two MM accounts (7413 + 4912) runs approximately <strong>~$63K/fiscal year</strong> at current rates. To confirm, ask Kevin for the monthly dividend credited per account — not the taxable income Molly journals.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">IPS spending policy — 4% of 3-year avg June 30 balances</div>
+      <div class="info amber" style="margin-bottom:12px;">
+        <strong>What this means:</strong> Per BRYC's Investment Policy Statement, the board has set a spending rule: you may withdraw up to 4% of the average of the last three June 30 balances from the two MM operating reserve accounts (7413 + 4912). This smooths out market swings. The calculation updates automatically as you update balances above. <strong>FY26 note:</strong> ~$250K was drawn vs. ~$105K authorized — flagged as a policy exception.
+      </div>
+      <table class="tbl">
+        <thead><tr><th>June 30</th><th class="r">1005-7413</th><th class="r">8847-4912</th><th class="r">Combined</th></tr></thead>
+        <tbody>
+          <tr><td>June 30, 2024</td><td class="r">$2,017,067</td><td class="r">$993,173</td><td class="r">$3,010,240</td></tr>
+          <tr><td>June 30, 2025</td><td class="r">$1,980,244</td><td class="r">$1,026,594</td><td class="r">$3,006,838</td></tr>
+          <tr><td>June 30, 2026 (current balances)</td><td class="r" id="ips-m1">—</td><td class="r" id="ips-m2">—</td><td class="r" id="ips-26">—</td></tr>
+          <tr class="tot"><td>3-year average</td><td class="r"></td><td class="r"></td><td class="r" id="ips-avg">—</td></tr>
+          <tr class="tot"><td>4% authorized spend (FY27)</td><td class="r"></td><td class="r"></td><td class="r pos" id="ips-auth">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ADVISOR LOG -->
+    <div id="wf-admin" style="display:none">
+      <div class="apanel">
+        <div class="apanel-title">✏ Log a Kevin / WF advisor update</div>
+        <p style="font-size:12px;color:var(--amber);margin-bottom:10px;">Use this after any call, email, or report from your advisor — even between monthly statements. Fill in whatever he shared; leave blank what he didn't mention.</p>
+        <div class="agrid">
+          <div class="af"><label>Date of update</label><input id="wf-dt" type="date"></div>
+          <div class="af"><label>Account (which one?)</label><select id="wf-acct"><option value="all">All / Combined</option><option value="endowment">8805-0682 Endowment</option><option value="mm1">1005-7413 EBR MM</option><option value="mm2">8847-4912 Yield MM</option></select></div>
+          <div class="af"><label>Account value as of date ($)</label><input id="wf-val" type="number" placeholder="e.g. 1426000"></div>
+          <div class="af"><label>YTD earnings ($)</label><input id="wf-ytd-d" type="number" placeholder="e.g. 108000"></div>
+          <div class="af"><label>YTD return (%)</label><input id="wf-ytd-p" type="number" step="0.01" placeholder="e.g. 9.43"></div>
+          <div class="af"><label>% Stocks</label><input id="wf-stocks" type="number" placeholder="e.g. 62"></div>
+          <div class="af"><label>% Bonds</label><input id="wf-bonds" type="number" placeholder="e.g. 20"></div>
+          <div class="af"><label>% Alternatives / other</label><input id="wf-alts" type="number" placeholder="e.g. 18"></div>
+          <div class="af"><label>Cash movement ($, use - for withdrawals)</label><input id="wf-cash" type="number" placeholder="e.g. 100000"></div>
+          <div class="af" style="grid-column:span 2"><label>Planned future action</label><input id="wf-plan" placeholder="e.g. Investing last $100K on Sept 7"></div>
+          <div class="af" style="grid-column:span 2"><label>Notes / context</label><textarea id="wf-notes" placeholder="Paste or summarize what Kevin said..."></textarea></div>
+        </div>
+        <button class="abtn" onclick="saveWFLog()">Log update</button><span class="saved" id="wf-saved">✓ Logged</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Advisor update log — off-cycle reports from Kevin</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">A running record of all updates received between formal monthly statements. Admins can add entries above.</p>
+      <div id="wf-log-list"><p style="font-size:13px;color:var(--faint);">No updates logged yet. Use the panel above to add entries after calls or emails from Kevin.</p></div>
+    </div>
+  </div>
+
+  <!-- ══════════ PIPELINE ══════════ -->
+  <div class="page" id="page-pipeline">
+    <div class="info blue" style="margin-bottom:14px;">
+      <strong>How to use this tab:</strong> This is your fundraising pipeline. Each row is a prospective gift with a conservative and optimistic estimate. Filter by lead, type, or quarter to focus your view. <strong>Overdue asks</strong> (past their expected month without a Committed status) are flagged in red. Admins can add and delete rows.
+    </div>
+
+    <div id="pip-admin" style="display:none">
+      <div class="apanel">
+        <div class="apanel-title">✏ Add pledge — Admin only</div>
+        <div class="pip-add-row">
+          <select id="na-type"><option>Foundation</option><option>Individual</option><option>Corporate</option><option>Dividend</option><option>Earned</option></select>
+          <select id="na-mo"><option value="">Month</option><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select>
+          <select id="na-lead"><option value="">Lead</option><option>Alyson*</option><option>Lucas</option><option>Elin</option><option>Josh</option></select>
+          <select id="na-status"><option value="">Status</option><option>Committed</option><option>Asked</option><option>Prospect</option></select>
+          <input id="na-con" type="number" placeholder="Conservative $">
+          <input id="na-opt" type="number" placeholder="Optimistic $">
+          <input id="na-pur" placeholder="Purpose">
+          <button class="abtn" style="padding:5px 10px;font-size:12px;margin:0;" onclick="addPledge()">+ Add</button>
+        </div>
+        <button class="abtn" style="background:var(--red);margin-top:8px;font-size:12px;padding:5px 14px;" onclick="resetPipeline()">↺ Reset to default data</button>
+        <p class="star-note">★ Alyson* = role currently unassigned. Reassign these pledges as leads are confirmed.</p>
+      </div>
+    </div>
+
+    <div class="kgrid">
+      <div class="kpi g"><div class="kpi-lbl">Total conservative</div><div class="kpi-val" id="pp-tc">—</div><div class="kpi-sub">All entries, lower estimate</div></div>
+      <div class="kpi b"><div class="kpi-lbl">Total optimistic</div><div class="kpi-val" id="pp-to">—</div><div class="kpi-sub">All entries, upper estimate</div></div>
+      <div class="kpi g"><div class="kpi-lbl">Committed</div><div class="kpi-val" id="pp-com">—</div><div class="kpi-sub">Conservative, committed only</div></div>
+      <div class="kpi r"><div class="kpi-lbl">Overdue asks</div><div class="kpi-val" id="pp-ov">—</div><div class="kpi-sub">Past expected month</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Filter</div>
+      <div class="sec" style="margin-top:0">By lead</div>
+      <div class="frow" id="fl-lead">
+        <div class="fchip on" data-dim="lead" data-val="all" onclick="setF(this,'lead')">All</div>
+        <div class="fchip" data-dim="lead" data-val="Alyson*" onclick="setF(this,'lead')">Alyson*</div>
+        <div class="fchip" data-dim="lead" data-val="Lucas" onclick="setF(this,'lead')">Lucas</div>
+        <div class="fchip" data-dim="lead" data-val="Elin" onclick="setF(this,'lead')">Elin</div>
+        <div class="fchip" data-dim="lead" data-val="Josh" onclick="setF(this,'lead')">Josh</div>
+      </div>
+      <div class="sec">By type</div>
+      <div class="frow" id="fl-type">
+        <div class="fchip on" data-dim="type" data-val="all" onclick="setF(this,'type')">All</div>
+        <div class="fchip" data-dim="type" data-val="Foundation" onclick="setF(this,'type')">Foundation</div>
+        <div class="fchip" data-dim="type" data-val="Individual" onclick="setF(this,'type')">Individual</div>
+        <div class="fchip" data-dim="type" data-val="Corporate" onclick="setF(this,'type')">Corporate</div>
+        <div class="fchip" data-dim="type" data-val="Dividend" onclick="setF(this,'type')">Dividend</div>
+        <div class="fchip" data-dim="type" data-val="Earned" onclick="setF(this,'type')">Earned</div>
+      </div>
+      <div class="sec">By quarter</div>
+      <div class="frow" id="fl-q">
+        <div class="fchip on" data-dim="quarter" data-val="all" onclick="setF(this,'quarter')">All</div>
+        <div class="fchip" data-dim="quarter" data-val="Q1" onclick="setF(this,'quarter')">Q1 Jul–Sep</div>
+        <div class="fchip" data-dim="quarter" data-val="Q2" onclick="setF(this,'quarter')">Q2 Oct–Dec</div>
+        <div class="fchip" data-dim="quarter" data-val="Q3" onclick="setF(this,'quarter')">Q3 Jan–Mar</div>
+        <div class="fchip" data-dim="quarter" data-val="Q4" onclick="setF(this,'quarter')">Q4 Apr–Jun</div>
+      </div>
+
+      <div class="pip-grid pip-head" style="margin-top:10px;">
+        <span>Type</span><span>Month</span><span>Lead</span><span>Status</span>
+        <span style="text-align:right">Conservative</span><span style="text-align:right">Optimistic</span>
+        <span>Purpose</span><span></span>
+      </div>
+      <div id="pip-rows"></div>
+      <div class="pip-grid" style="background:var(--bg);font-weight:700;border-radius:0 0 6px 6px;">
+        <span>Total</span><span></span><span></span><span></span>
+        <span style="text-align:right;color:var(--g2)" id="pf-c">—</span>
+        <span style="text-align:right" id="pf-o">—</span>
+        <span></span><span></span>
+      </div>
+      <p class="star-note" style="margin-top:8px;">★ Alyson* = role unassigned. Reassign as leads are confirmed.</p>
+    </div>
+  </div>
+
+  <!-- ══════════ FORECAST ══════════ -->
+  <div class="page" id="page-forecast">
+    <div class="info blue" style="margin-bottom:14px;">
+      <strong>How to use this tab:</strong> Set your expected monthly burn rate and the number of months you want to model. The tool pulls from your pipeline (conservative or optimistic) and shows month-by-month projected cash. The "When to raise" table flags months where cash drops below a 3-month buffer — those are your fundraising deadlines.
+    </div>
+
+    <div class="apanel" style="margin-bottom:16px;">
+      <div class="apanel-title">📊 Budget sheet — live sync</div>
+      <p style="font-size:12px;color:var(--amber);margin-bottom:10px;">
+        Pulls the TOTALS row from your FY27 budget sheet directly. Click after any budget update so the forecast uses your latest numbers. Requires internet connection.
+      </p>
+      <button class="abtn" id="sync-btn" onclick="fetchBudget()">Sync pipeline from sheet</button>
+      <span id="sync-status" style="font-size:12px;margin-left:10px;"></span>
+      <div id="budget-table-wrap" style="margin-top:4px;overflow-x:auto;"></div>
+    </div>
+
+
+    <div class="apanel" style="margin-bottom:16px;">
+      <div class="apanel-title">📊 Pipeline sync — No Names_FY27 Revenue</div>
+      <p style="font-size:12px;color:var(--amber);margin-bottom:10px;">Pulls pledge rows from the <strong>No Names_FY27 Revenue</strong> tab and replaces the pipeline data. Click whenever the sheet is updated. Requires internet.</p>
+      <button class="abtn" id="sync-btn" onclick="fetchBudget()">Sync pipeline from sheet</button>
+      <span id="sync-stat" style="font-size:12px;margin-left:10px;"></span>
+      <div id="budget-tbl"></div>
+      <p style="margin-top:10px;font-size:11px;color:var(--faint);">
+        If sync was working before and stopped: 
+        <button onclick="S.budgetMonthly=null;S.expMonthly=null;save();document.getElementById('budget-tbl').innerHTML='';document.getElementById('exp-tbl').innerHTML='';alert('Cache cleared. Try syncing again.');" 
+          style="font-size:11px;background:none;border:.5px solid var(--rule);border-radius:4px;padding:2px 8px;cursor:pointer;color:var(--muted);">
+          Clear sync cache
+        </button>
+      </p>
+
+    </div>
+
+    <div class="apanel" style="margin-bottom:16px;border-color:var(--b2);background:var(--b6);">
+      <div class="apanel-title" style="color:var(--b0);">📋 Expense sync — FY27 Operating Budget (For Grants)</div>
+      <p style="font-size:12px;color:var(--b0);margin-bottom:10px;">Pulls the TOTALS row from your expense budget tab. When synced, this overrides the burn rate slider with actual monthly budgeted expenses. Sync after any budget revision.</p>
+      <button class="abtn" id="sync-exp-btn" onclick="fetchExpenses()" style="background:var(--b2);">Sync expenses</button>
+      <span id="sync-exp-stat" style="font-size:12px;margin-left:10px;"></span>
+      <div id="exp-tbl"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Revenue vs. expense runway</div>
+      <p style="font-size:12px;color:var(--faint);margin-bottom:8px;">↓ Burn rate is used as a fallback if budget sheet hasn't been synced yet, and for the 3-month buffer calculation.</p>
+      <div class="srow"><label>Monthly burn rate (fallback) ($)</label><input type="range" id="fc-burn" min="150000" max="450000" step="5000" value="290000" oninput="updateFC()"><span class="sval" id="fc-burn-v">$290K</span></div>
+      <div class="srow"><label>Months to model</label><input type="range" id="fc-mo" min="1" max="18" step="1" value="6" oninput="updateFC()"><span class="sval" id="fc-mo-v">6 mo</span></div>
+      <div class="srow"><label>Revenue confidence</label><input type="range" id="fc-conf" min="60" max="110" step="5" value="100" oninput="updateFC()"><span class="sval" id="fc-conf-v">100%</span></div>
+      <div class="srow"><label>Use optimistic pipeline</label><input type="checkbox" id="fc-opt" onchange="updateFC()" style="width:auto;flex:none;"><span class="sval" id="fc-opt-v" style="color:var(--muted);font-weight:400;">Off — using conservative</span></div>
+      <div style="margin-top:14px" id="fc-bars"></div>
+      <div class="verdict" id="fc-warn"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Month-by-month cash projection</div>
+      <div style="height:260px"><canvas id="fc-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">When do we need to raise?</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Months where projected cash drops below a 3-month expense buffer. These are your fundraising urgency windows.</p>
+      <div id="fc-raise"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ HISTORY ══════════ -->
+  <div class="page" id="page-history">
+    <div class="info blue" style="margin-bottom:14px;">
+      <strong>Data source:</strong> IRS Form 990 filings via ProPublica Nonprofit Explorer (EIN 26-2477597). Most recent filing reflects fiscal year ending June 30, 2025. FY2024 revenue is elevated by the $1.5M EBRPSS investment — not representative of operating revenue.
+    </div>
+    <div class="card">
+      <div class="card-title">990 financials — FY2023–FY2025</div>
+      <div style="height:250px;margin-bottom:14px"><canvas id="hist-rev"></canvas></div>
+      <table class="tbl">
+        <thead><tr><th>FY</th><th class="r">Revenue</th><th class="r">Expenses</th><th class="r">Net</th><th class="r">Total assets</th></tr></thead>
+        <tbody>
+          <tr><td>FY2025 (ending Jun 30, 2025)</td><td class="r">$3,395,223</td><td class="r">$3,755,850</td><td class="r neg">($360,627)</td><td class="r">$5,089,149</td></tr>
+          <tr><td>FY2024 (ending Jun 30, 2024)</td><td class="r">$6,363,220</td><td class="r">$2,200,858</td><td class="r pos">$4,162,362</td><td class="r">$5,262,295</td></tr>
+          <tr><td>FY2023 (ending Jun 30, 2023)</td><td class="r">$1,778,312</td><td class="r">$1,949,403</td><td class="r neg">($171,091)</td><td class="r">$1,250,720</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Reserve coverage history</div>
+      <div style="height:230px"><canvas id="hist-cov"></canvas></div>
+      <p class="fn">Chase only was never above 3.1 months. Chase + MM operating reached 7.9 months in FY26 — strongest position in BRYC history.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Year context</div>
+      <div class="yr-block">
+        <div class="yr-tag">FY23</div>
+        <div class="yr-headline">Deficit year — building the foundation</div>
+        <div class="yr-events">Hired 3 FT · Salary adj: $76,735 · Deficit: ($171,091) · Chase end: $406,834 · No MM accounts yet</div>
+        <div class="yr-note">Chase alone covered ~2.5 months. BRYC still in early growth mode.</div>
+      </div>
+      <div class="yr-block">
+        <div class="yr-tag">FY24</div>
+        <div class="yr-headline">Breakout year — EBRPSS investment</div>
+        <div class="yr-events">$1.5M from EBRPSS · Hired 8 FT · Salary adj: $188,500 · Airline expansion · SSA Re-org · Surplus: $4,162,362</div>
+        <div class="yr-note">EBRPSS investment seeded the reserve accounts. Without it, FY25 deficit would have been a crisis.</div>
+      </div>
+      <div class="yr-block">
+        <div class="yr-tag">FY25</div>
+        <div class="yr-headline">Deficit year — growth costs catch up</div>
+        <div class="yr-events">Hired 3 FT · Salary adj: $74,645 · Deficit: ($360,627) · MMs: $1.98M · Endowment: $1.03M · Chase end: $318,016</div>
+        <div class="yr-note">Expenses outpaced revenue as expanded team ran at full cost. Reserves absorbed the deficit. Chase dropped $252K.</div>
+      </div>
+      <div class="yr-block">
+        <div class="yr-tag">FY26</div>
+        <div class="yr-headline">Return to surplus — stabilizing</div>
+        <div class="yr-events">Hired 2 FT · Salary adj: $224,798 · Surplus: $127,734 · MMs: $1.85M · Endowment: $1.41M · Chase end: $356,247</div>
+        <div class="yr-note">First surplus since expansion. Combined coverage ~7.9 months — strongest reserve position in BRYC history.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────
+const PIN = '2025';
+
+  // ─── GOOGLE SHEETS BUDGET SYNC ───────────────────────────────────────────
+  const GS_KEY  = 'AIzaSyBmSYKBVjW-W77RO_aXwUAn1NKKsxEtx9w';
+  const GS_ID   = '1TTfaso7scICZqalPWnP5AlgNRAtvimGCxlYZEP7CZfk';
+  const GS_TAB_REV  = 'No Names_FY27 Revenue';
+  const GS_TAB_EXP  = 'FY27 Operating Budget (For Grants)';
+  const GS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets';
+  const FY_MOS  = ['July','August','September','October','November','December','January','February','March','April','May','June'];
+
+  async function fetchBudget(){
+    // This fetches PIPELINE/PLEDGE data from the revenue tab
+    const btn=document.getElementById('sync-btn'), stat=document.getElementById('sync-stat');
+    btn.disabled=true; btn.textContent='Syncing…'; stat.textContent='';
+    try{
+      const url=`${GS_BASE}/${GS_ID}/values/${encodeURIComponent(GS_TAB_REV)}?key=${GS_KEY}&majorDimension=ROWS`;
+      const res=await fetch(url);
+      // Show HTTP status in error regardless
+      if(!res.ok){
+        let msg='HTTP '+res.status+': ';
+        try{ const e=await res.json(); msg+=e?.error?.message||res.statusText; }catch(x){ msg+=res.statusText; }
+        if(res.status===400) msg='400: Bad request — check API key is valid';
+        if(res.status===403) msg='403: Sheets API not enabled on your Google Cloud project. Go to console.cloud.google.com → APIs & Services → Library → Google Sheets API → Enable.';
+        if(res.status===404) msg='404: Sheet or tab not found. Tab name must match exactly: "'+GS_TAB_REV+'"';
+        throw new Error(msg);
+      }
+      const data=await res.json();
+      const rows=data.values||[];
+      if(!rows.length) throw new Error('No data returned from tab "'+GS_TAB_REV+'". Is the tab name correct?');
+      
+      // Find header row — look for row containing "Type" and "Conserv" or "Conservative"
+      let headerIdx=-1;
+      for(let i=0;i<rows.length;i++){
+        const row=rows[i];
+        const hasType=row.some(c=>(c||'').toString().trim().toLowerCase()==='type');
+        const hasConserv=row.some(c=>(c||'').toString().toLowerCase().includes('conserv'));
+        if(hasType&&hasConserv){ headerIdx=i; break; }
+      }
+      if(headerIdx===-1) throw new Error('Could not find header row with "Type" and "Conserv" columns. First row values: '+rows[0].join(', '));
+      
+      const headers=rows[headerIdx].map(c=>(c||'').toString().trim().toLowerCase());
+      const col=name=>headers.findIndex(h=>h.includes(name));
+      const iType=col('type'), iMonth=col('month'), iLead=col('lead');
+      const iStatus=Math.max(col('m.y. status'),col('status'));
+      const iCon=col('conserv'), iOpt=col('optimist');
+      const iPur=col('purpose');
+      
+      if(iType===-1||iCon===-1||iOpt===-1) throw new Error('Required columns not found. Headers: '+headers.join(', '));
+      
+      const parse=v=>parseFloat((v||'0').toString().replace(/[$,]/g,''))||0;
+      const pledges=[];
+      for(let i=headerIdx+1;i<rows.length;i++){
+        const r=rows[i];
+        if(!r||!r[iType]||r[iType].toString().trim()==='') continue; // skip blank rows
+        const type=(r[iType]||'').toString().trim();
+        // Skip if type looks like a header or total row
+        if(type.toUpperCase()==='TYPE'||type.toUpperCase()==='TOTAL') continue;
+        pledges.push({
+          type,
+          mo:(r[iMonth]||'').toString().trim(),
+          lead:(r[iLead]||'').toString().trim(),
+          status:(iStatus>=0?(r[iStatus]||''):'').toString().trim(),
+          con:parse(r[iCon]),
+          opt:parse(r[iOpt]),
+          pur:(iPur>=0?(r[iPur]||''):'').toString().trim()
+        });
+      }
+      if(!pledges.length) throw new Error('No pledge rows found after header row '+headerIdx+'. Check the sheet has data rows.');
+      
+      S.pledges=pledges;
+      S.pipelineFetchedAt=new Date().toISOString();
+      save(); renderPipeline(); updateDash();
+      const ts=new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+      stat.textContent='✓ Synced '+pledges.length+' pledges at '+ts; stat.style.color='var(--g2)';
+    }catch(e){
+      stat.textContent=''; // clear first
+      document.getElementById('sync-stat').textContent='✗ '+e.message;
+      document.getElementById('sync-stat').style.color='var(--red)';
+      console.error('Pipeline sync error:',e);
+    }finally{ btn.disabled=false; btn.textContent='Sync pipeline from sheet'; }
+  }
+
+  async function fetchExpenses(){
+    const btn=document.getElementById('sync-exp-btn'), stat=document.getElementById('sync-exp-stat');
+    btn.disabled=true; btn.textContent='Syncing…'; stat.textContent='';
+    try{
+      const url=`${GS_BASE}/${GS_ID}/values/${encodeURIComponent(GS_TAB_EXP)}?key=${GS_KEY}&majorDimension=ROWS`;
+      const res=await fetch(url);
+      if(!res.ok){
+        let msg='HTTP '+res.status+': ';
+        try{ const e=await res.json(); msg+=e?.error?.message||res.statusText; }catch(x){ msg+=res.statusText; }
+        if(res.status===400) msg='400: Bad request — check API key is valid';
+        if(res.status===403) msg='403: Sheets API not enabled. Go to console.cloud.google.com → APIs & Services → Library → Google Sheets API → Enable.';
+        if(res.status===404) msg='404: Tab not found. Must match exactly: "'+GS_TAB_EXP+'"';
+        throw new Error(msg);
+      }
+      const data=await res.json();
+      const rows=data.values||[];
+      if(!rows.length) throw new Error('No data returned. Is tab name correct? Expected: "'+GS_TAB_EXP+'"');
+      
+      // Find TOTALS row — search entire sheet
+      let totRow=null;
+      const firstCols=[];
+      for(const r of rows){
+        const cell=(r[0]||'').toString().trim().toUpperCase();
+        firstCols.push(cell);
+        if(cell==='TOTALS'||cell==='TOTAL'){ totRow=r; break; }
+      }
+      if(!totRow) throw new Error('TOTALS row not found. Last 5 first-column values: '+firstCols.slice(-5).filter(Boolean).join(' | '));
+      
+      const parse=v=>parseFloat((v||'0').replace(/[$,]/g,''))||0;
+      const monthly=totRow.slice(1,13).map(parse);
+      if(monthly.filter(v=>v>0).length<6) throw new Error('TOTALS row found but fewer than 6 non-zero monthly values. Check the row has 12 monthly columns.');
+      
+      S.expMonthly=monthly; S.expTotal=monthly.reduce((a,b)=>a+b,0);
+      S.expFetchedAt=new Date().toISOString();
+      save(); renderExpTable(monthly); updateFC();
+      const ts=new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+      stat.textContent='✓ Synced at '+ts+' — total: '+fmt(S.expTotal); stat.style.color='var(--b2)';
+    }catch(e){
+      document.getElementById('sync-exp-stat').textContent='✗ '+e.message;
+      document.getElementById('sync-exp-stat').style.color='var(--red)';
+      console.error('Expense sync error:',e);
+    }finally{ btn.disabled=false; btn.textContent='Sync expenses'; }
+  }
+
+
+  function renderExpTable(monthly){
+    const wrap=document.getElementById('exp-tbl'); if(!wrap) return;
+    const total=monthly.reduce((a,b)=>a+b,0), avg=total/12;
+    const top3=monthly.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v).slice(0,3)
+      .map(x=>FY_MOS[x.i].slice(0,3)+' ('+fmt(x.v)+')').join(', ');
+    wrap.innerHTML=`<div style="overflow-x:auto;margin-top:10px;">
+      <table class="tbl" style="min-width:900px;">
+        <thead><tr>${FY_MOS.map(m=>`<th class="r" style="font-size:10px;">${m.slice(0,3)}</th>`).join('')}<th class="r">FY27 Total</th><th class="r">Avg/mo</th></tr></thead>
+        <tbody><tr>${monthly.map(v=>`<td class="r" style="font-size:12px;">${fmt(v)}</td>`).join('')}
+          <td class="r" style="font-weight:700;">${fmt(total)}</td>
+          <td class="r" style="font-weight:700;color:var(--gold);">${fmt(avg)}</td>
+        </tr></tbody>
+      </table>
+    </div>
+    <p class="fn">Highest spend months: ${top3}. Forecast uses these actuals per month.</p>`;
+  }
+
+  function fcWithBudget(mo,conf,useOpt,burn){
+    const monthly=S.expMonthly&&S.expMonthly.length===12?S.expMonthly:S.budgetMonthly;
+    const pipe=(useOpt?S.pledges.reduce((a,p)=>a+p.opt,0):S.pledges.reduce((a,p)=>a+p.con,0))*conf;
+    // Determine current FY month index (July=0 ... June=11)
+    const jsM=new Date().getMonth(); // 0=Jan
+    const fyNow=(jsM-6+12)%12;
+    let tExp=0; const monthExp=[];
+    for(let i=0;i<mo;i++){ const fi=(fyNow+i)%12; const e=monthly[fi]||burn; monthExp.push({e,fi}); tExp+=e; }
+    const net=S.chase+pipe-tExp-S.debt, max=Math.max(S.chase+pipe,tExp+S.debt);
+    // bars
+    const bars=[
+      {l:'Starting cash',v:S.chase,c:'#006b56'},
+      {l:`+ Pipeline (${useOpt?'opt':'conserv'}, ${Math.round(conf*100)}% conf)`,v:pipe,c:'#4da08f'},
+      {l:`− Expenses (${mo} mo, budget actuals)`,v:tExp,c:'#BF9000',neg:true},
+      {l:'− Debt + credit cards',v:S.debt,c:'#F09595',neg:true},
+    ];
+    document.getElementById('fc-bars').innerHTML=bars.map(b=>`<div class="brow">
+      <span class="bl">${b.l}</span><div class="btrack"><div class="bfill" style="background:${b.c};width:${Math.min(100,b.v/max*100)}%"></div></div>
+      <span class="bv ${b.neg?'neg':''}">${b.neg?'(':''}${fmt(b.v)}${b.neg?')':''}</span></div>`).join('')+
+      `<div class="brow bdiv" style="font-weight:600"><span class="bl">Projected end cash</span>
+      <div class="btrack"><div class="bfill" style="background:${net>=0?'#006b56':'#8B1A1A'};width:${Math.max(2,Math.abs(net)/max*100)}%"></div></div>
+      <span class="bv ${net<0?'neg':''}">${fmtF(net)}</span></div>`;
+    const w=document.getElementById('fc-warn');
+    if(net<0){w.style.cssText='background:#FCEBEB;color:#8B1A1A';w.textContent=`Projected shortfall of ${fmt(Math.abs(net))} over ${mo} months.`;}
+    else if(net<burn*2){w.style.cssText='background:#FEF6DC;color:#7A4500';w.textContent=`Projected ${fmt(net)} — under 2 months buffer. Watch closely.`;}
+    else{w.style.cssText='background:#d3ebe7;color:#034c3d';w.textContent=`Projected ${fmt(net)} after ${mo} months using budget actuals.`;}
+    // chart
+    const labels=[],cashLine=[]; let run=S.chase; const mRev=pipe/mo;
+    monthExp.forEach(({e,fi})=>{ run=run+mRev-e; labels.push(FY_MOS[fi].slice(0,3)); cashLine.push(Math.round(run)); });
+    if(fcChart) fcChart.destroy();
+    fcChart=new Chart(document.getElementById('fc-chart'),{type:'line',data:{labels,datasets:[
+      {label:'Projected cash',data:cashLine,borderColor:'#006b56',backgroundColor:'rgba(0,107,86,.08)',fill:true,tension:.35,pointRadius:4},
+      {label:'3-month buffer',data:Array(mo).fill(burn*3),borderColor:'#8B1A1A',borderDash:[4,3],pointRadius:0,fill:false}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11},boxWidth:10}}},
+      scales:{y:{ticks:{callback:v=>fmt(v),font:{size:11}},grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
+    // raise table
+    const raise=[]; run=S.chase;
+    monthExp.forEach(({e,fi})=>{ run=run+mRev-e; if(run<burn*3) raise.push({mo:FY_MOS[fi],cash:run,gap:burn*3-run,exp:e}); });
+    document.getElementById('fc-raise').innerHTML=raise.length===0
+      ?'<p style="color:var(--g2);font-size:13px;">✓ No critical raise windows in this period.</p>'
+      :'<table class="tbl"><thead><tr><th>Month</th><th class="r">Budgeted expenses</th><th class="r">Projected cash</th><th class="r">Gap to 3-mo buffer</th></tr></thead><tbody>'
+        +raise.map(r=>`<tr><td>${r.mo}</td><td class="r">${fmtF(r.exp)}</td><td class="r neg">${fmtF(r.cash)}</td><td class="r neg">${fmtF(r.gap)}</td></tr>`).join('')
+        +'</tbody></table>';
+  }
+ // ← CHANGE THIS before sharing
+const MOS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MQ  = {January:'Q3',February:'Q3',March:'Q3',April:'Q4',May:'Q4',June:'Q4',July:'Q1',August:'Q1',September:'Q1',October:'Q2',November:'Q2',December:'Q2'};
+const fmt = n => n>=1e6?'$'+(n/1e6).toFixed(2)+'M':n>=1e3?'$'+Math.round(n/1e3)+'K':'$'+Math.round(n);
+const fmtF = n => (n<0?'(':'')+'$'+Math.abs(Math.round(n)).toLocaleString()+(n<0?')':'');
+
+// ─── STATE (persists to localStorage) ────────────────────
+let S = {
+  chase:834117, debt:67078, chaseDate:'',
+  mm1:537731, mm2:1312012, endowment:1322973, eai:103627, invDate:'',
+  wfLog:[
+    {dt:'2026-08-01',acct:'endowment',val:1426000,ytdD:108000,ytdP:9.43,stocks:62,bonds:20,alts:18,cashMv:100000,plan:'Investing last $100K Sept 7th',notes:'We discussed averaging $400K into managed account over 4 months. $200K already invested, $100K added today. Account lost $2K since June 5th board report. Page 3 of 11 shows YTD additions.'}
+  ],
+  pledges:[
+    {type:'Foundation',mo:'November',lead:'Alyson*',status:'',con:5000,opt:5000,pur:'Unrestricted'},
+    {type:'Individual',mo:'November',lead:'Lucas',status:'',con:5000,opt:10000,pur:'Unrestricted'},
+    {type:'Corporate',mo:'September',lead:'Elin',status:'',con:2500,opt:2500,pur:'Senior Program'},
+    {type:'Foundation',mo:'December',lead:'Alyson*',status:'',con:0,opt:25000,pur:'Unrestricted'},
+    {type:'Individual',mo:'May',lead:'Alyson*',status:'',con:2500,opt:2500,pur:'Unrestricted'},
+    {type:'Foundation',mo:'January',lead:'Alyson*',status:'',con:5000,opt:5000,pur:'Unrestricted'},
+    {type:'Individual',mo:'November',lead:'Lucas',status:'Committed',con:25000,opt:50000,pur:'Advising Program'},
+    {type:'Individual',mo:'December',lead:'Lucas',status:'',con:100000,opt:100000,pur:'Unrestricted'},
+    {type:'Corporate',mo:'December',lead:'Alyson*',status:'',con:10000,opt:15000,pur:'Fellowship'},
+    {type:'Foundation',mo:'November',lead:'Elin',status:'',con:0,opt:10000,pur:''},
+    {type:'Individual',mo:'October',lead:'Lucas',status:'',con:10000,opt:10000,pur:'Unrestricted'},
+    {type:'Foundation',mo:'December',lead:'Lucas',status:'',con:7000,opt:7000,pur:'Unrestricted'},
+    {type:'Foundation',mo:'',lead:'Lucas',status:'Returner',con:37500,opt:37500,pur:'Persistence/Car'},
+    {type:'Individual',mo:'December',lead:'Lucas',status:'',con:12000,opt:12000,pur:'Unrestricted'},
+    {type:'Dividend',mo:'',lead:'Lucas',status:'',con:40000,opt:25000,pur:''},
+    {type:'Earned',mo:'',lead:'Elin',status:'',con:9000,opt:10000,pur:''},
+    {type:'Individual',mo:'January',lead:'Alyson*',status:'',con:10000,opt:10000,pur:'Unrestricted'},
+  ]
+};
+let role=null, fcChart=null, pipF={lead:'all',type:'all',quarter:'all'};
+
+function save(){ try{localStorage.setItem('bryc_v2',JSON.stringify(S));}catch(e){} }
+function load(){ try{
+    const d=JSON.parse(localStorage.getItem('bryc_v2'));
+    if(d){
+      const {pledges:sp,wfLog:wl,...rest}=d;
+      Object.assign(S,rest);
+      if(sp&&sp.length>0) S.pledges=sp;
+      if(wl&&wl.length>0) S.wfLog=wl;
+    }
+  }catch(e){} }
+
+// ─── AUTH ─────────────────────────────────────────────────
+function tryAdmin(){
+  if(document.getElementById('pin-in').value===PIN){ setRole('admin'); }
+  else{ document.getElementById('auth-err').textContent='Incorrect PIN. Try again.'; }
+}
+function enterViewer(){ setRole('viewer'); }
+function setRole(r){
+  role=r;
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('role-pill').textContent=r==='admin'?'Admin':'Viewer';
+  document.querySelectorAll('[id$="-admin"],[id$="-wf-admin"],[id="wf-admin"]').forEach(el=>el.style.display=r==='admin'?'block':'none');
+  init();
+}
+function signOut(){
+  role=null;
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('pin-in').value='';
+  document.getElementById('auth-err').textContent='';
+}
+document.getElementById('pin-in').addEventListener('keydown',e=>{ if(e.key==='Enter') tryAdmin(); });
+
+// ─── NAV ──────────────────────────────────────────────────
+function go(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
+  if(id==='forecast') setTimeout(updateFC,50);
+}
+
+// ─── SAVE HELPERS ─────────────────────────────────────────
+function flash(id){ const e=document.getElementById(id); e.style.display='inline'; setTimeout(()=>e.style.display='none',2000); }
+function saveCash(){
+  const c=+document.getElementById('a-chase').value, d=+document.getElementById('a-debt').value, dt=document.getElementById('a-chase-dt').value;
+  if(c) S.chase=c; if(d) S.debt=d; if(dt) S.chaseDate=dt;
+  save(); refreshAll(); flash('cash-saved');
+}
+function saveInv(){
+  const m1=+document.getElementById('a-mm1').value, m2=+document.getElementById('a-mm2').value,
+        en=+document.getElementById('a-end').value, ea=+document.getElementById('a-eai').value,
+        dt=document.getElementById('a-inv-dt').value;
+  if(m1) S.mm1=m1; if(m2) S.mm2=m2; if(en) S.endowment=en; if(ea) S.eai=ea; if(dt) S.invDate=dt;
+  save(); refreshAll(); flash('inv-saved');
+}
+function saveWFLog(){
+  const entry={
+    dt:document.getElementById('wf-dt').value,
+    acct:document.getElementById('wf-acct').value,
+    val:+document.getElementById('wf-val').value||null,
+    ytdD:+document.getElementById('wf-ytd-d').value||null,
+    ytdP:+document.getElementById('wf-ytd-p').value||null,
+    stocks:+document.getElementById('wf-stocks').value||null,
+    bonds:+document.getElementById('wf-bonds').value||null,
+    alts:+document.getElementById('wf-alts').value||null,
+    cashMv:+document.getElementById('wf-cash').value||null,
+    plan:document.getElementById('wf-plan').value,
+    notes:document.getElementById('wf-notes').value
+  };
+  S.wfLog.unshift(entry); save(); renderWFLog(); flash('wf-saved');
+}
+function addPledge(){
+  S.pledges.push({
+    type:document.getElementById('na-type').value,
+    mo:document.getElementById('na-mo').value,
+    lead:document.getElementById('na-lead').value,
+    status:document.getElementById('na-status').value,
+    con:+document.getElementById('na-con').value||0,
+    opt:+document.getElementById('na-opt').value||0,
+    pur:document.getElementById('na-pur').value
+  });
+  save(); renderPipeline();
+}
+function delPledge(i){ S.pledges.splice(i,1); save(); renderPipeline(); }
+
+  function resetPipeline(){
+    if(!confirm('Reset pipeline to default seed data? This will remove any pledges you added.')) return;
+    S.pledges=[
+      {type:'Foundation',mo:'November',lead:'Alyson*',status:'',con:5000,opt:5000,pur:'Unrestricted'},
+      {type:'Individual',mo:'November',lead:'Lucas',status:'',con:5000,opt:10000,pur:'Unrestricted'},
+      {type:'Corporate',mo:'September',lead:'Elin',status:'',con:2500,opt:2500,pur:'Senior Program'},
+      {type:'Foundation',mo:'December',lead:'Alyson*',status:'',con:0,opt:25000,pur:'Unrestricted'},
+      {type:'Individual',mo:'May',lead:'Alyson*',status:'',con:2500,opt:2500,pur:'Unrestricted'},
+      {type:'Foundation',mo:'January',lead:'Alyson*',status:'',con:5000,opt:5000,pur:'Unrestricted'},
+      {type:'Individual',mo:'November',lead:'Lucas',status:'Committed',con:25000,opt:50000,pur:'Advising Program'},
+      {type:'Individual',mo:'December',lead:'Lucas',status:'',con:100000,opt:100000,pur:'Unrestricted'},
+      {type:'Corporate',mo:'December',lead:'Alyson*',status:'',con:10000,opt:15000,pur:'Fellowship'},
+      {type:'Foundation',mo:'November',lead:'Elin',status:'',con:0,opt:10000,pur:''},
+      {type:'Individual',mo:'October',lead:'Lucas',status:'',con:10000,opt:10000,pur:'Unrestricted'},
+      {type:'Foundation',mo:'December',lead:'Lucas',status:'',con:7000,opt:7000,pur:'Unrestricted'},
+      {type:'Foundation',mo:'',lead:'Lucas',status:'Returner',con:37500,opt:37500,pur:'Persistence/Car'},
+      {type:'Individual',mo:'December',lead:'Lucas',status:'',con:12000,opt:12000,pur:'Unrestricted'},
+      {type:'Dividend',mo:'',lead:'Lucas',status:'',con:40000,opt:25000,pur:''},
+      {type:'Earned',mo:'',lead:'Elin',status:'',con:9000,opt:10000,pur:''},
+      {type:'Individual',mo:'January',lead:'Alyson*',status:'',con:10000,opt:10000,pur:'Unrestricted'},
+    ];
+    save(); renderPipeline(); updateDash();
+  }
+
+
+// ─── REFRESH ALL ──────────────────────────────────────────
+function refreshAll(){ updateDash(); updateCashPage(); updateInvPage(); renderPipeline(); renderWFLog(); updateFC(); }
+
+// ─── DASHBOARD ────────────────────────────────────────────
+function updateDash(){
+  const burn=+document.getElementById('db-burn').value;
+  document.getElementById('db-burn-v').textContent=fmt(burn);
+  const liq=S.mm1+S.mm2, tot=liq+S.endowment, max=14;
+  const cm=S.chase/burn, lm=(S.chase+liq)/burn, tm=(S.chase+tot)/burn;
+  document.getElementById('d-chase').textContent=fmt(S.chase);
+  document.getElementById('d-liq').textContent=fmt(liq);
+  document.getElementById('d-end').textContent=fmt(S.endowment);
+  document.getElementById('d-mo').textContent=lm.toFixed(1)+' mo';
+  const pc=S.pledges.reduce((a,p)=>a+p.con,0), po=S.pledges.reduce((a,p)=>a+p.opt,0);
+  document.getElementById('d-pc').textContent=fmt(pc);
+  document.getElementById('d-po').textContent=fmt(po);
+  ['chase','mm','all'].forEach((k,i)=>{
+    const v=[cm,lm,tm][i];
+    document.getElementById('rc-'+k).textContent=v.toFixed(1)+' mo';
+    document.getElementById('rcf-'+k).style.width=Math.min(100,v/max*100)+'%';
+  });
+  const leads=['Alyson*','Lucas','Elin','Josh'];
+  document.getElementById('d-pip-summary').innerHTML='<table class="tbl"><thead><tr><th>Lead</th><th class="r">Conservative</th><th class="r">Optimistic</th><th class="r">Count</th></tr></thead><tbody>'+
+    leads.map(l=>{
+      const rows=S.pledges.filter(p=>p.lead===l);
+      if(!rows.length) return`<tr><td>${l}</td><td class="r" style="color:var(--faint)">—</td><td class="r" style="color:var(--faint)">—</td><td class="r" style="color:var(--faint)">0</td></tr>`;
+      return`<tr><td>${l}${l==='Alyson*'?' <span style="font-size:10px;color:var(--amber)">(unassigned)</span>':''}</td><td class="r pos">${fmtF(rows.reduce((a,p)=>a+p.con,0))}</td><td class="r">${fmtF(rows.reduce((a,p)=>a+p.opt,0))}</td><td class="r">${rows.length}</td></tr>`;
+    }).join('')+'</tbody></table>';
+}
+
+// ─── CASH PAGE ────────────────────────────────────────────
+function updateCashPage(){
+  document.getElementById('cp-chase').textContent=fmt(S.chase);
+  document.getElementById('cp-debt').textContent=fmt(S.debt);
+  document.getElementById('cp-net').textContent=fmt(S.chase-S.debt);
+  if(S.chaseDate) document.getElementById('cp-dt').textContent='As of '+new Date(S.chaseDate+'T00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  updateCF();
+}
+function updateCF(){
+  const mo=+document.getElementById('cf-mo').value, exp=+document.getElementById('cf-exp').value,
+        rev=+document.getElementById('cf-rev').value, extra=+document.getElementById('cf-extra').value;
+  document.getElementById('cf-mo-v').textContent=mo+' mo';
+  document.getElementById('cf-exp-v').textContent=fmt(exp);
+  document.getElementById('cf-rev-v').textContent=fmt(rev);
+  document.getElementById('cf-extra-v').textContent=fmt(extra);
+  const tExp=exp*mo, net=S.chase+rev+extra-tExp-S.debt, max=S.chase+rev+extra;
+  const bars=[
+    {l:'Starting cash',v:S.chase,c:'#006b56'},
+    {l:`+ Revenue (${mo} mo)`,v:rev,c:'#4da08f'},
+    {l:'+ Confirmed additional',v:extra,c:'#d3ebe7'},
+    {l:`− Expenses (${mo} mo)`,v:tExp,c:'#BF9000',neg:true},
+    {l:'− Debt + credit cards',v:S.debt,c:'#F09595',neg:true},
+  ];
+  document.getElementById('cf-bars').innerHTML=bars.map(b=>`<div class="brow">
+    <span class="bl">${b.l}</span>
+    <div class="btrack"><div class="bfill" style="background:${b.c};width:${Math.min(100,b.v/max*100)}%"></div></div>
+    <span class="bv ${b.neg?'neg':''}">${b.neg?'(':''}${fmt(b.v)}${b.neg?')':''}</span>
+  </div>`).join('')+`<div class="brow bdiv" style="font-weight:600">
+    <span class="bl">Projected end cash</span>
+    <div class="btrack"><div class="bfill" style="background:${net>=0?'#006b56':'#8B1A1A'};width:${Math.max(2,Math.abs(net)/max*100)}%"></div></div>
+    <span class="bv ${net<0?'neg':''}">${fmtF(net)}</span>
+  </div>`;
+  const v=document.getElementById('cf-verdict');
+  const m=(net/exp).toFixed(1);
+  if(net>300000){v.style.cssText='background:#d3ebe7;color:#034c3d';v.textContent=`Strong — projected ${fmt(net)} covers ~${m} more months after this period.`;}
+  else if(net>0){v.style.cssText='background:#FEF6DC;color:#7A4500';v.textContent=`Manageable — ${fmt(net)} projected. Monitor revenue timing carefully.`;}
+  else{v.style.cssText='background:#FCEBEB;color:#8B1A1A';v.textContent=`Projected shortfall of ${fmt(Math.abs(net))}. Consider drawing from reserves or accelerating collections.`;}
+}
+
+// ─── INVESTMENTS PAGE ─────────────────────────────────────
+function updateInvPage(){
+  const tot=S.mm1+S.mm2+S.endowment;
+  ['iv-mm1','iv-mm2','iv-end','iv-eai'].forEach((id,i)=>{
+    document.getElementById(id).textContent=fmt([S.mm1,S.mm2,S.endowment,S.eai][i]);
+  });
+  document.getElementById('iv-tot').textContent=fmt(tot);
+  document.getElementById('iv-yield').textContent=(S.eai/tot*100).toFixed(2)+'%';
+  const c26=S.mm1+S.mm2, avg=(3010240+3006838+c26)/3;
+  document.getElementById('ips-m1').textContent=fmtF(S.mm1);
+  document.getElementById('ips-m2').textContent=fmtF(S.mm2);
+  document.getElementById('ips-26').textContent=fmtF(c26);
+  document.getElementById('ips-avg').textContent=fmtF(avg);
+  document.getElementById('ips-auth').textContent=fmtF(avg*0.04);
+}
+
+// ─── WF LOG ───────────────────────────────────────────────
+function renderWFLog(){
+  const el=document.getElementById('wf-log-list');
+  if(!S.wfLog.length){ el.innerHTML='<p style="font-size:13px;color:var(--faint)">No updates logged yet.</p>'; return; }
+  el.innerHTML=S.wfLog.map((e,i)=>{
+    const acctLabel={all:'All accounts',endowment:'8805-0682 Endowment',mm1:'1005-7413 EBR MM',mm2:'8847-4912 Yield MM'}[e.acct]||e.acct;
+    const hasAlloc=e.stocks||e.bonds||e.alts;
+    const total=(e.stocks||0)+(e.bonds||0)+(e.alts||0);
+    return`<div class="wf-entry">
+      <div class="wf-date">${e.dt?new Date(e.dt+'T00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}):'Date not recorded'} · ${acctLabel}
+        ${role==='admin'?`<button onclick="delWF(${i})" style="float:right;background:none;border:none;color:var(--faint);cursor:pointer;font-size:12px;">✕ Remove</button>`:''}
+      </div>
+      <div class="wf-grid">
+        ${e.val?`<div class="wf-field"><strong>${fmtF(e.val)}</strong>Account value</div>`:''}
+        ${e.ytdD?`<div class="wf-field"><strong class="pos">${fmtF(e.ytdD)} (${e.ytdP||'?'}%)</strong>YTD earnings</div>`:''}
+        ${e.cashMv?`<div class="wf-field"><strong ${e.cashMv>0?'class="pos"':'class="neg"'}>${e.cashMv>0?'+':''}${fmtF(e.cashMv)}</strong>Cash movement</div>`:''}
+      </div>
+      ${hasAlloc&&total>0?`<div style="margin-bottom:6px;font-size:11px;color:var(--faint)">Asset allocation:</div>
+      <div class="wf-alloc">
+        <div class="wf-alloc-seg" style="background:var(--g4);flex:${e.stocks||0}" title="Stocks ${e.stocks}%"></div>
+        <div class="wf-alloc-seg" style="background:var(--b3);flex:${e.bonds||0}" title="Bonds ${e.bonds}%"></div>
+        <div class="wf-alloc-seg" style="background:var(--gold);flex:${e.alts||0}" title="Alts ${e.alts}%"></div>
+      </div>
+      <div style="display:flex;gap:16px;font-size:11px;color:var(--muted);margin-bottom:6px;">
+        ${e.stocks?`<span>📈 Stocks ${e.stocks}%</span>`:''}${e.bonds?`<span>📊 Bonds ${e.bonds}%</span>`:''}${e.alts?`<span>🔄 Alts/Other ${e.alts}%</span>`:''}
+      </div>`:''}
+      ${e.plan?`<div style="font-size:12px;color:var(--b1);margin-bottom:4px;"><strong>Planned:</strong> ${e.plan}</div>`:''}
+      ${e.notes?`<div class="wf-note">${e.notes}</div>`:''}
+    </div>`;
+  }).join('');
+}
+function delWF(i){ if(confirm('Remove this log entry?')){ S.wfLog.splice(i,1); save(); renderWFLog(); } }
+
+// ─── PIPELINE ─────────────────────────────────────────────
+function setF(el,dim){
+  document.querySelectorAll(`[data-dim="${dim}"]`).forEach(e=>e.classList.remove('on'));
+  el.classList.add('on'); pipF[dim]=el.dataset.val; renderPipeline();
+}
+function filtered(){
+  const now=new Date(), nm=MOS[now.getMonth()];
+  return S.pledges.filter(p=>{
+    if(pipF.lead!=='all'&&p.lead!==pipF.lead) return false;
+    if(pipF.type!=='all'&&p.type!==pipF.type) return false;
+    if(pipF.quarter!=='all'&&(MQ[p.mo]||'')!==pipF.quarter) return false;
+    return true;
+  });
+}
+function renderPipeline(){
+  const now=new Date(), nm=MOS[now.getMonth()];
+  const tc=S.pledges.reduce((a,p)=>a+p.con,0), to=S.pledges.reduce((a,p)=>a+p.opt,0);
+  const comm=S.pledges.filter(p=>p.status==='Committed').reduce((a,p)=>a+p.con,0);
+  const ov=S.pledges.filter(p=>p.mo&&p.status!=='Committed'&&MOS.indexOf(p.mo)<MOS.indexOf(nm)).length;
+  document.getElementById('pp-tc').textContent=fmt(tc);
+  document.getElementById('pp-to').textContent=fmt(to);
+  document.getElementById('pp-com').textContent=fmt(comm);
+  document.getElementById('pp-ov').textContent=ov;
+  const rows=filtered();
+  const ftc=rows.reduce((a,p)=>a+p.con,0), fto=rows.reduce((a,p)=>a+p.opt,0);
+  document.getElementById('pf-c').textContent=fmtF(ftc);
+  document.getElementById('pf-o').textContent=fmtF(fto);
+  const typeC={Foundation:'g',Individual:'n',Corporate:'b',Dividend:'y',Earned:'y'};
+  const leadC={'Alyson*':'y',Lucas:'g',Elin:'b',Josh:'g'};
+  document.getElementById('pip-rows').innerHTML=rows.map(p=>{
+    const ri=S.pledges.indexOf(p);
+    const od=p.mo&&p.status!=='Committed'&&MOS.indexOf(p.mo)<MOS.indexOf(nm);
+    return`<div class="pip-grid" style="${od?'background:#FCEBEB':''}">
+      <span><span class="badge ${typeC[p.type]||'n'}">${p.type}</span></span>
+      <span style="color:${od?'#8B1A1A':'var(--ink)'};font-size:12px;">${p.mo||'—'}</span>
+      <span><span class="badge ${leadC[p.lead]||'n'}">${p.lead||'—'}</span></span>
+      <span>${p.status?`<span class="badge g">${p.status}</span>`:''}</span>
+      <span style="text-align:right;font-weight:600;color:var(--g2)">${fmtF(p.con)}</span>
+      <span style="text-align:right;color:var(--muted)">${fmtF(p.opt)}</span>
+      <span style="font-size:11px;color:var(--faint)">${p.pur||''}</span>
+      <span>${role==='admin'?`<button class="pdel" onclick="delPledge(${ri})">✕</button>`:''}</span>
+    </div>`;
+  }).join('');
+}
+
+// ─── FORECAST ─────────────────────────────────────────────
+function updateFC(){
+  const burn=+document.getElementById('fc-burn').value, mo=+document.getElementById('fc-mo').value,
+        conf=+document.getElementById('fc-conf').value/100, useOpt=document.getElementById('fc-opt').checked;
+  document.getElementById('fc-burn-v').textContent=fmt(burn);
+  document.getElementById('fc-mo-v').textContent=mo+' mo';
+  document.getElementById('fc-conf-v').textContent=Math.round(conf*100)+'%';
+  document.getElementById('fc-opt-v').textContent=useOpt?'On — using optimistic':'Off — using conservative';
+  const hasExp=S.expMonthly&&S.expMonthly.length===12, hasRev=S.budgetMonthly&&S.budgetMonthly.length===12;
+  if(hasExp||hasRev){ fcWithBudget(mo,conf,useOpt,burn); return; }
+  const pipe=(useOpt?S.pledges.reduce((a,p)=>a+p.opt,0):S.pledges.reduce((a,p)=>a+p.con,0))*conf;
+  const tExp=burn*mo, net=S.chase+pipe-tExp-S.debt, max=Math.max(S.chase+pipe,tExp+S.debt);
+  const bars=[
+    {l:'Starting cash',v:S.chase,c:'#006b56'},
+    {l:`+ Pipeline (${useOpt?'opt':'conserv'}, ${Math.round(conf*100)}% conf)`,v:pipe,c:'#4da08f'},
+    {l:`− Expenses (${mo} mo)`,v:tExp,c:'#BF9000',neg:true},
+    {l:'− Debt',v:S.debt,c:'#F09595',neg:true},
+  ];
+  document.getElementById('fc-bars').innerHTML=bars.map(b=>`<div class="brow">
+    <span class="bl">${b.l}</span>
+    <div class="btrack"><div class="bfill" style="background:${b.c};width:${Math.min(100,b.v/max*100)}%"></div></div>
+    <span class="bv ${b.neg?'neg':''}">${b.neg?'(':''}${fmt(b.v)}${b.neg?')':''}</span>
+  </div>`).join('')+`<div class="brow bdiv" style="font-weight:600">
+    <span class="bl">Projected end cash</span>
+    <div class="btrack"><div class="bfill" style="background:${net>=0?'#006b56':'#8B1A1A'};width:${Math.max(2,Math.abs(net)/max*100)}%"></div></div>
+    <span class="bv ${net<0?'neg':''}">${fmtF(net)}</span>
+  </div>`;
+  const w=document.getElementById('fc-warn');
+  if(net<0){w.style.cssText='background:#FCEBEB;color:#8B1A1A';w.textContent=`Projected shortfall of ${fmt(Math.abs(net))} over ${mo} months. Pipeline needs to close or expenses need to flex.`;}
+  else if(net<burn*2){w.style.cssText='background:#FEF6DC;color:#7A4500';w.textContent=`Projected ${fmt(net)} — less than 2 months of buffer remaining. Monitor closely.`;}
+  else{w.style.cssText='background:#d3ebe7;color:#034c3d';w.textContent=`Projected ${fmt(net)} after ${mo} months — solid position at current assumptions.`;}
+  const mRev=pipe/mo, labels=[], cashLine=[];
+  let run=S.chase;
+  for(let i=0;i<mo;i++){
+    run=run+mRev-burn; labels.push('Mo '+(i+1)); cashLine.push(Math.round(run));
+  }
+  if(fcChart) fcChart.destroy();
+  fcChart=new Chart(document.getElementById('fc-chart'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Projected cash',data:cashLine,borderColor:'#006b56',backgroundColor:'rgba(0,107,86,.08)',fill:true,tension:.35,pointRadius:3},
+      {label:'3-month buffer',data:Array(mo).fill(burn*3),borderColor:'#8B1A1A',borderDash:[4,3],pointRadius:0,fill:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11},boxWidth:10}}},
+      scales:{y:{ticks:{callback:v=>fmt(v),font:{size:11}},grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
+  });
+  const raise=[];
+  run=S.chase;
+  for(let i=0;i<mo;i++){
+    run=run+mRev-burn;
+    if(run<burn*3) raise.push({m:i+1,cash:run,gap:burn*3-run});
+  }
+  document.getElementById('fc-raise').innerHTML=raise.length===0?
+    '<p style="color:var(--g2);font-size:13px;">✓ No critical raise windows in this period at current assumptions.</p>':
+    '<table class="tbl"><thead><tr><th>Month</th><th class="r">Projected cash</th><th class="r">Gap to 3-mo buffer</th></tr></thead><tbody>'+
+    raise.map(r=>`<tr><td>Month ${r.m}</td><td class="r neg">${fmtF(r.cash)}</td><td class="r neg">${fmtF(r.gap)}</td></tr>`).join('')+'</tbody></table>';
+}
+
+// ─── HISTORY CHARTS ───────────────────────────────────────
+function initCharts(){
+  new Chart(document.getElementById('hist-rev'),{
+    type:'bar',
+    data:{labels:['FY2023','FY2024','FY2025'],datasets:[
+      {label:'Revenue',data:[1778312,6363220,3395223],backgroundColor:'#4da08f',borderColor:'#006b56',borderWidth:1,borderRadius:4},
+      {label:'Expenses',data:[1949403,2200858,3755850],backgroundColor:'#BF9000',borderColor:'#7A4500',borderWidth:1,borderRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11},boxWidth:10}}},
+      scales:{y:{ticks:{callback:v=>fmt(v),font:{size:11}},grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
+  });
+  new Chart(document.getElementById('hist-cov'),{
+    type:'bar',
+    data:{labels:['FY23','FY24','FY25','FY26'],datasets:[
+      {label:'Chase only',data:[2.5,3.1,1.0,1.3],backgroundColor:'#80bbaf',borderRadius:4},
+      {label:'Chase + MMs',data:[2.5,3.1,7.3,7.9],backgroundColor:'#006b56',borderRadius:4},
+      {label:'+ Endowment',data:[2.5,3.1,10.6,10.8],backgroundColor:'#0a52a9',borderRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11},boxWidth:10}}},
+      scales:{y:{min:0,max:13,ticks:{callback:v=>v+' mo',font:{size:11}},grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false},ticks:{font:{size:11}}}}},
+    plugins:[{id:'t',afterDraw(c){
+      const{ctx,chartArea:{left,right},scales:{y}}=c;
+      [[6,'#8B1A1A','6 mo min'],[8,'#0a52a9','8 mo target']].forEach(([v,col,lbl])=>{
+        const yp=y.getPixelForValue(v);
+        ctx.save();ctx.beginPath();ctx.moveTo(left,yp);ctx.lineTo(right,yp);
+        ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.stroke();
+        ctx.fillStyle=col;ctx.font='10px sans-serif';ctx.fillText(lbl,left+4,yp-4);ctx.restore();
+      });
+    }}]
+  });
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+function init(){
+  load();
+  refreshAll();
+  initCharts();
+  if(S.expMonthly&&S.expMonthly.length){ renderExpTable(S.expMonthly); }
+  if (S.budgetMonthly && S.budgetMonthly.length) {
+    renderBudgetTable(S.budgetMonthly);
+    const d = S.budgetFetchedAt ? new Date(S.budgetFetchedAt) : null;
+    if (d) {
+      const el = document.getElementById('sync-status');
+      if (el) { el.textContent = '✓ Last synced ' + d.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); el.style.color='var(--g2)'; }
+      const note = document.getElementById('last-sync-note');
+      if (note) note.textContent = 'Last synced ' + d.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric'}) + '.';
+    }
+  } else {
+    const note = document.getElementById('last-sync-note');
+    if (note) note.textContent = 'Not yet synced — click "Sync from budget sheet" on the Forecast tab.';
+  }
+}
+</script>
+</body>
+</html>
