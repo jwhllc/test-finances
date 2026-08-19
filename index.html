@@ -117,11 +117,11 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
 
 /* ─── TOOLTIP ────────────────────────────────────────────────────── */
 .tip-wrap{position:relative;display:inline-flex;align-items:center;}
-.tip-icon{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.2);color:rgba(255,255,255,.85);font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:help;flex-shrink:0;user-select:none;border:1px solid rgba(255,255,255,.25);transition:all .15s;}
-.tip-icon:hover{background:rgba(255,255,255,.4);}
-.tip-box{visibility:hidden;opacity:0;position:fixed;width:260px;background:var(--g0);color:rgba(255,255,255,.9);font-size:12px;line-height:1.6;padding:10px 14px;border-radius:8px;z-index:9999;pointer-events:none;font-weight:400;transition:opacity .15s;box-shadow:0 4px 20px rgba(0,0,0,.35);}
+.tip-icon{width:15px;height:15px;border-radius:50%;background:var(--rule);color:var(--faint);font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:help;flex-shrink:0;user-select:none;}
+.tip-icon:hover{background:var(--g5);color:var(--g0);}
+.tip-box{display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 8px);width:260px;background:var(--g0);color:rgba(255,255,255,.9);font-size:12px;line-height:1.6;padding:10px 14px;border-radius:8px;z-index:200;pointer-events:none;font-weight:400;}
 .tip-box::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--g0);}
-.tip-wrap:hover .tip-box{visibility:visible;opacity:1;}
+.tip-wrap:hover .tip-box{display:block;}
 
 /* ─── ADMIN PANEL ────────────────────────────────────────────────── */
 .apanel{background:var(--gold-lt);border:.5px solid var(--gold);border-radius:var(--rad);padding:16px 20px;margin-bottom:18px;}
@@ -230,7 +230,7 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
 <!-- ══ AUTH ══════════════════════════════════════════════════════════ -->
 <div id="auth">
   <div class="auth-box">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="70" height="70" style="display:block;margin:0 auto 14px;border-radius:50%;"><circle cx="50" cy="50" r="50" fill="#0a0a0a"/><text x="50" y="63" text-anchor="middle" font-family="proxima-nova,sans-serif" font-weight="800" font-size="30" fill="white">BRYC</text></svg>
+    <div class="auth-logo">BRYC</div>
     <div class="auth-sub">Financial Dashboard</div>
     <input class="auth-pin" id="pin-in" type="password" placeholder="Admin PIN" maxlength="6">
     <div class="auth-err" id="auth-err"></div>
@@ -244,7 +244,7 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
 <div id="app" style="display:none">
 <header class="hdr">
   <div class="hdr-brand">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="34" height="34" style="flex-shrink:0;border-radius:50%;"><circle cx="50" cy="50" r="50" fill="#0a0a0a"/><text x="50" y="63" text-anchor="middle" font-family="proxima-nova,sans-serif" font-weight="800" font-size="30" fill="white">BRYC</text></svg>
+    <div class="hdr-logo">BRYC</div>
     <div class="hdr-title">Financial Dashboard</div>
   </div>
   <div class="hdr-r">
@@ -447,54 +447,75 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
   </div>
 
   <!-- How to read your earnings -->
-    <!-- How to read your earnings -->
   <div class="card">
     <div class="card-hdr"><div class="card-title">Where to see what you've earned</div></div>
-    <div style="border:.5px solid var(--rule);border-radius:8px;margin-bottom:8px;overflow:hidden;">
-      <button onclick="tSrc('s1')" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:none;border:none;cursor:pointer;font-family:proxima-nova,sans-serif;">
-        <div style="display:flex;align-items:center;gap:10px;"><span style="width:22px;height:22px;border-radius:50%;background:var(--g2);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;">1</span><span style="font-size:13px;font-weight:600;color:var(--ink);">WF Advisors portal</span><span style="font-size:11px;color:var(--faint);">Live &#183; daily</span></div>
-        <span id="s1-a" style="color:var(--faint);font-size:11px;transition:transform .2s;">&#9660;</span>
-      </button>
-      <div id="s1" style="display:none;padding:0 16px 14px;border-top:.5px solid var(--rule);">
+
+    <details style="border:.5px solid var(--rule);border-radius:8px;margin-bottom:8px;">
+      <summary style="padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;list-style:none;font-family:proxima-nova,sans-serif;">
+        <span style="width:22px;height:22px;border-radius:50%;background:var(--g2);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
+        <span style="font-size:13px;font-weight:600;color:var(--ink);">WF Advisors portal</span>
+        <span style="font-size:11px;color:var(--faint);margin-left:4px;">Live &#183; daily</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--faint);">&#9660;</span>
+      </summary>
+      <div style="padding:0 16px 14px;border-top:.5px solid var(--rule);">
         <p style="font-size:12px;color:var(--muted);margin:10px 0 8px;line-height:1.7;">Log in at <strong style="color:var(--ink);">wellsfargoadvisors.com</strong> and select your account. Two tables to know:</p>
         <div style="background:var(--bg);border-radius:6px;padding:11px 13px;margin-bottom:8px;">
           <p style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:5px;">Business Brokerage &#8212; return percentages</p>
-          <p style="font-size:12px;color:var(--muted);line-height:1.7;">Headers: Last Month &#183; <strong style="color:var(--g2);">YTD</strong> &#183; 1Y &#183; 3Y &#183; 5Y &#183; Since Inception<br>The <strong style="color:var(--g2);">YTD column</strong> = year-to-date return %. Log as "YTD return %" in the advisor update below.</p>
+          <p style="font-size:12px;color:var(--muted);line-height:1.7;">Headers: Last Month &#183; <strong style="color:var(--g2);">YTD</strong> &#183; 1Y &#183; 3Y &#183; 5Y &#183; Since Inception<br>
+          The <strong style="color:var(--g2);">YTD column</strong> = year-to-date return percentage. Log this as <strong>"YTD return %"</strong> in the advisor update form below.</p>
         </div>
         <div style="background:var(--bg);border-radius:6px;padding:11px 13px;margin-bottom:8px;">
           <p style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:5px;">Investment Results &#8212; dollar earnings</p>
-          <p style="font-size:12px;color:var(--muted);line-height:1.7;">Headers: Return &#183; Beginning Market Value &#183; Deposits Minus Withdrawals &#183; <strong style="color:var(--g2);">Investment Results</strong> &#183; Ending Market Value<br><strong style="color:var(--g2);">Investment Results</strong> = actual dollars the portfolio earned, net of your own cash movements. Log as "YTD earnings $."<br><strong style="color:var(--ink);">Ending Market Value</strong> = current account value.</p>
+          <p style="font-size:12px;color:var(--muted);line-height:1.7;">Headers: Return &#183; Beginning Market Value &#183; Deposits Minus Withdrawals &#183; <strong style="color:var(--g2);">Investment Results</strong> &#183; Ending Market Value<br>
+          <strong style="color:var(--g2);">Investment Results</strong> = dollars the portfolio actually earned, net of your own cash movements. Log as <strong>"YTD earnings $."</strong><br>
+          <strong style="color:var(--ink);">Ending Market Value</strong> = current account value to log.</p>
         </div>
-        <div style="background:#d3eba7;border-radius:6px;padding:10px 13px;"><p style="font-size:12px;color:var(--g1);line-height:1.6;"><strong>You don't need to wait for Kevin.</strong> Pull these three numbers from the portal anytime and log them in the advisor update form below.</p></div>
+        <div style="background:#d3eba7;border-radius:6px;padding:10px 13px;">
+          <p style="font-size:12px;color:var(--g1);line-height:1.6;"><strong>You don't need to wait for Kevin.</strong> Pull these three numbers from the portal anytime and log them in the advisor update form below.</p>
+        </div>
       </div>
-    </div>
-    <div style="border:.5px solid var(--rule);border-radius:8px;margin-bottom:8px;overflow:hidden;">
-      <button onclick="tSrc('s2')" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:none;border:none;cursor:pointer;font-family:proxima-nova,sans-serif;">
-        <div style="display:flex;align-items:center;gap:10px;"><span style="width:22px;height:22px;border-radius:50%;background:var(--g2);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;">2</span><span style="font-size:13px;font-weight:600;color:var(--ink);">Kevin's advisor updates</span><span style="font-size:11px;color:var(--faint);">As of his report date</span></div>
-        <span id="s2-a" style="color:var(--faint);font-size:11px;transition:transform .2s;">&#9660;</span>
-      </button>
-      <div id="s2" style="display:none;padding:0 16px 14px;border-top:.5px solid var(--rule);">
-        <p style="font-size:12px;color:var(--muted);margin:10px 0 8px;line-height:1.7;">Same numbers as the portal, pulled as of his report date. Log these after each call &#8212; they populate the Earned YTD cards above.</p>
+    </details>
+
+    <details style="border:.5px solid var(--rule);border-radius:8px;margin-bottom:8px;">
+      <summary style="padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;list-style:none;font-family:proxima-nova,sans-serif;">
+        <span style="width:22px;height:22px;border-radius:50%;background:var(--g2);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
+        <span style="font-size:13px;font-weight:600;color:var(--ink);">Kevin's advisor updates</span>
+        <span style="font-size:11px;color:var(--faint);margin-left:4px;">As of his report date</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--faint);">&#9660;</span>
+      </summary>
+      <div style="padding:0 16px 14px;border-top:.5px solid var(--rule);">
+        <p style="font-size:12px;color:var(--muted);margin:10px 0 8px;line-height:1.7;">Same numbers as the portal, as of his report date. Log these after each call &#8212; they populate the Earned YTD cards at the top of this tab.</p>
         <div style="background:var(--bg);border-radius:6px;padding:11px 13px;">
           <p style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px;">Example from a recent Kevin update:</p>
           <p style="font-size:12px;color:var(--muted);line-height:1.8;font-style:italic;">"YTD the account has earned <strong style="color:var(--g2);font-style:normal;">$108K or 9.43%</strong> and totals <strong style="color:var(--ink);font-style:normal;">$1,426K</strong> as of last Friday's close. Portfolio: <strong style="color:var(--ink);font-style:normal;">62% Stocks &#183; 20% Bonds &#183; 18% Alts.</strong>"</p>
         </div>
+        <p style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.7;">Log these in the advisor update form below after each call or email.</p>
       </div>
-    </div>
-    <div style="border:.5px solid var(--rule);border-radius:8px;overflow:hidden;">
-      <button onclick="tSrc('s3')" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:none;border:none;cursor:pointer;font-family:proxima-nova,sans-serif;">
-        <div style="display:flex;align-items:center;gap:10px;"><span style="width:22px;height:22px;border-radius:50%;background:var(--g2);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;">3</span><span style="font-size:13px;font-weight:600;color:var(--ink);">Monthly WF statement</span><span style="font-size:11px;color:var(--faint);">Month-end close</span></div>
-        <span id="s3-a" style="color:var(--faint);font-size:11px;transition:transform .2s;">&#9660;</span>
-      </button>
-      <div id="s3" style="display:none;padding:0 16px 14px;border-top:.5px solid var(--rule);">
+    </details>
+
+    <details style="border:.5px solid var(--rule);border-radius:8px;">
+      <summary style="padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;list-style:none;font-family:proxima-nova,sans-serif;">
+        <span style="width:22px;height:22px;border-radius:50%;background:var(--g2);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
+        <span style="font-size:13px;font-weight:600;color:var(--ink);">Monthly WF statement</span>
+        <span style="font-size:11px;color:var(--faint);margin-left:4px;">Month-end close</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--faint);">&#9660;</span>
+      </summary>
+      <div style="padding:0 16px 14px;border-top:.5px solid var(--rule);">
         <p style="font-size:12px;color:var(--muted);margin:10px 0 8px;line-height:1.7;">Open the <em>Combined Snapshot</em> (first pages of your WF statement) &#8594; <em>Combined income summary</em> page.</p>
         <div style="background:var(--bg);border-radius:6px;padding:11px 13px;margin-bottom:8px;">
-          <p style="font-size:12px;color:var(--muted);line-height:1.8;"><strong style="color:var(--ink);">"This Period"</strong> = that month only. <strong style="color:var(--ink);">"This Year"</strong> = calendar YTD &#8212; resets Jan 1, does not match BRYC's fiscal year.<br>Row: <strong style="color:var(--ink);">"Total income on all accounts" (bottom row).</strong><br><br>For BRYC fiscal year (Jul&#8211;Jun): add up "This Period" from July statements onward.</p>
+          <p style="font-size:12px;color:var(--muted);line-height:1.8;">
+            <strong style="color:var(--ink);">"This Period"</strong> = income for that month only.<br>
+            <strong style="color:var(--ink);">"This Year"</strong> = calendar YTD &#8212; resets January 1, does not match BRYC's fiscal year.<br>
+            Row to look at: <strong style="color:var(--ink);">"Total income on all accounts" (bottom row).</strong><br><br>
+            For BRYC fiscal year (Jul&#8211;Jun): add up "This Period" from July statements onward.
+          </p>
         </div>
-        <div style="background:var(--gold-lt);border:.5px solid #e0c060;border-radius:6px;padding:10px 13px;"><p style="font-size:12px;color:var(--amber);line-height:1.6;"><strong>On Molly's entries:</strong> Taxable income she journals monthly is an IRS figure &#8212; not market performance. Use Investment Results or Kevin's updates for the real picture.</p></div>
+        <div style="background:var(--gold-lt);border:.5px solid #e0c060;border-radius:6px;padding:10px 13px;">
+          <p style="font-size:12px;color:var(--amber);line-height:1.6;"><strong>On Molly's entries:</strong> Taxable income she journals monthly is an IRS figure &#8212; not market performance. Use Investment Results from the portal or Kevin's updates for the real picture.</p>
+        </div>
       </div>
-    </div>
-  </div></div>
+    </details>
+  </div>
 
   <!-- Advisor log -->
   <div class="card">
@@ -619,194 +640,11 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
           <div class="fchip" data-dim="quarter" data-val="Q4" onclick="setF(this,'quarter')">Q4 Apr–Jun</div>
         </div>
       </div>
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;">Estimate</div>
-        <div class="frow" id="fl-est" style="margin:0;gap:5px;">
-          <div class="fchip on" data-dim="est" data-val="all" onclick="setF(this,'est')">Both</div>
-          <div class="fchip" data-dim="est" data-val="conservative" onclick="setF(this,'est')">Conservative</div>
-          <div class="fchip" data-dim="est" data-val="optimistic" onclick="setF(this,'est')">Optimistic</div>
-        </div>
-      </div>
     </div>
 
     <div class="pip-grid pip-head">
       <span>Type</span><span>Month</span><span>Lead</span><span>Status</span>
-      <span style="text-align:right" id="pip-col-c">Conservative</span><span style="text-align:right" id="pip-col-o">Optimistic</span>
-      <span>Purpose</span><span></span>
-    </div>
-    <div id="pip-rows"></div>
-    <div class="pip-grid" style="background:var(--bg);font-weight:700;border-top:1px solid var(--rule);">
-      <span>Filtered total</span><span></span><span></span><span></span>
-      <span style="text-align:right;color:var(--g2)" id="pf-c">—</span>
-      <span style="text-align:right;color:var(--b2)" id="pf-o">—</span>
-      <span></span><span></span>
-    </div>
-    <p class="star-note" style="margin-top:8px;">★ Alyson* = role unassigned</p>
-  </div>
-</div>
-
-<!-- ══════════════════════ FORECAST ═══════════════════════════════════ -->
-<div class="page" id="page-forecast">
-  <div style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.7;">
-    <strong style="color:var(--ink);">Forecast</strong> uses your full pipeline and models how far revenue stretches against monthly burn over time — up to 18 months. It answers: <em>when do we need to raise?</em>
-    <span style="display:inline-block;background:#d3eba7;border-radius:4px;padding:2px 8px;font-size:11px;color:var(--g1);margin-left:8px;font-weight:600;">
-      Cash position tab = near-term, known-numbers view
-    </span>
-  </div>
-
-  <!-- Sync panels -->
-  <div class="two-col" style="margin-bottom:16px;">
-    <div class="sync-panel">
-      <div class="sync-panel-title">Pipeline sync</div>
-      <button class="abtn" id="sync-btn2" onclick="fetchPipeline(true)" style="padding:6px 14px;font-size:12px;margin:0;">Sync pipeline</button>
-      <span class="sync-stat" id="sync-stat2" style="font-size:11px;"></span>
-    </div>
-    <div class="sync-panel">
-      <div class="sync-panel-title">Expense budget sync</div>
-      <button class="abtn" id="sync-exp-btn" onclick="fetchExpenses()" style="padding:6px 14px;font-size:12px;margin:0;background:var(--b2);">Sync expenses</button>
-      <span class="sync-stat" id="sync-exp-stat" style="font-size:11px;"></span>
-    </div>
-  </div>
-
-  <div class="two-col" style="align-items:start;">
-    
-
-  <!-- Advisor log -->
-  <div class="card">
-    <div class="card-hdr">
-      <div class="card-title">Advisor update log — Kevin / WF reports</div>
-      <div class="tip-wrap"><span class="tip-icon">i</span><div class="tip-box" style="width:280px;">Log entries after any call or email from Kevin. These populate the Earned YTD figure above. Note: entries are saved locally to this browser — not shared across devices.</div></div>
-    </div>
-    <div id="wf-log-list"><p style="font-size:13px;color:var(--faint)">No updates logged yet.</p></div>
-  </div>
-
-  <div id="wf-admin" style="display:none">
-    <div class="apanel">
-      <div class="apanel-title">✏ Log a Kevin / WF update</div>
-      <div class="agrid">
-        <div class="af"><label>Date of update</label><input id="wf-dt" type="date"></div>
-        <div class="af"><label>Account</label><select id="wf-acct"><option value="all">All / Combined</option><option value="endowment">8805-0682 Endowment</option><option value="mm1">1005-7413 EBR MM</option><option value="mm2">8847-4912 Yield MM</option></select></div>
-        <div class="af"><label>Account value ($)</label><input id="wf-val" type="number" placeholder="e.g. 1426000"></div>
-        <div class="af"><label>YTD earnings ($)</label><input id="wf-ytd-d" type="number" placeholder="e.g. 108000"></div>
-        <div class="af"><label>YTD return (%)</label><input id="wf-ytd-p" type="number" step="0.01" placeholder="e.g. 9.43"></div>
-        <div class="af"><label>% Stocks</label><input id="wf-stocks" type="number" placeholder="e.g. 62"></div>
-        <div class="af"><label>% Bonds</label><input id="wf-bonds" type="number" placeholder="e.g. 20"></div>
-        <div class="af"><label>% Alternatives</label><input id="wf-alts" type="number" placeholder="e.g. 18"></div>
-        <div class="af"><label>Cash movement ($)</label><input id="wf-cash" type="number" placeholder="+ deposit / - withdrawal"></div>
-        <div class="af" style="grid-column:span 2"><label>Planned action</label><input id="wf-plan" placeholder="e.g. Investing last $100K Sept 7"></div>
-        <div class="af" style="grid-column:span 3"><label>Notes</label><textarea id="wf-notes" placeholder="Paste or summarize what Kevin said…"></textarea></div>
-      </div>
-      <button class="abtn" onclick="saveWFLog()">Log update</button><span class="saved" id="wf-saved">✓ Logged</span>
-    </div>
-  </div>
-
-  <!-- IPS — collapsed by default -->
-  <div class="card">
-    <div class="card-hdr">
-      <div class="card-title">IPS spending policy</div>
-      <button class="collapse-btn" id="ips-toggle" onclick="toggleIPS()">Show details</button>
-    </div>
-    <div id="ips-body" style="display:none">
-      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Per BRYC's Investment Policy Statement: authorized annual spend = 4% of the 3-year average June 30 balance across the two MM operating reserve accounts. FY26 draw (~$250K) exceeded authorization (~$105K) — logged as a policy exception.</p>
-      <table class="tbl">
-        <thead><tr><th>June 30</th><th class="r">1005-7413</th><th class="r">8847-4912</th><th class="r">Combined</th></tr></thead>
-        <tbody>
-          <tr><td>June 30, 2024</td><td class="r">$2,017,067</td><td class="r">$993,173</td><td class="r">$3,010,240</td></tr>
-          <tr><td>June 30, 2025</td><td class="r">$1,980,244</td><td class="r">$1,026,594</td><td class="r">$3,006,838</td></tr>
-          <tr><td>June 30, 2026 (current)</td><td class="r" id="ips-m1">—</td><td class="r" id="ips-m2">—</td><td class="r" id="ips-26">—</td></tr>
-          <tr class="tot"><td>3-year average</td><td></td><td></td><td class="r" id="ips-avg">—</td></tr>
-          <tr class="tot"><td>4% authorized spend (FY27)</td><td></td><td></td><td class="r pos" id="ips-auth">—</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════ PIPELINE ═══════════════════════════════════ -->
-<div class="page" id="page-pipeline">
-  <div id="pip-admin" style="display:none">
-    <div class="apanel">
-      <div class="apanel-title">✏ Add pledge</div>
-      <div class="pip-add" style="border-radius:8px;margin-bottom:2px;">
-        <select id="na-type"><option>Foundation</option><option>Individual</option><option>Corporate</option><option>Dividend</option><option>Earned</option></select>
-        <select id="na-mo"><option value="">Month</option><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select>
-        <select id="na-lead"><option value="">Lead</option><option>Alyson*</option><option>Lucas</option><option>Elin</option><option>Josh</option></select>
-        <select id="na-status"><option value="">Status</option><option>Committed</option><option>Asked</option><option>Prospect</option></select>
-        <input id="na-con" type="number" placeholder="Conservative $">
-        <input id="na-opt" type="number" placeholder="Optimistic $">
-        <input id="na-pur" placeholder="Purpose">
-        <button class="abtn" style="padding:5px 10px;font-size:12px;margin:0;" onclick="addPledge()">+ Add</button>
-      </div>
-      <div style="display:flex;gap:10px;margin-top:10px;align-items:center;">
-        <button class="abtn red" style="font-size:12px;padding:6px 14px;" onclick="resetPipeline()">↺ Reset to defaults</button>
-        <span class="star-note">★ Alyson* = role unassigned. Reassign as leads are confirmed.</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- KPIs -->
-  <div class="four-col" style="margin-bottom:18px;">
-    <div class="bal-card green"><div class="bal-label">Conservative total</div><div class="bal-value" id="pp-tc">—</div><div class="bal-sub">All entries, lower estimate</div></div>
-    <div class="bal-card blue"><div class="bal-label">Optimistic total</div><div class="bal-value" id="pp-to">—</div><div class="bal-sub">All entries, upper estimate</div></div>
-    <div class="bal-card green"><div class="bal-label">Committed</div><div class="bal-value" id="pp-com">—</div><div class="bal-sub">Conservative, committed only</div></div>
-    <div class="bal-card" style="border-top:3px solid var(--red)"><div class="bal-label">Overdue asks</div><div class="bal-value" style="color:var(--red)" id="pp-ov">—</div><div class="bal-sub">Past expected month</div></div>
-  </div>
-
-  <!-- Sync + filters + table -->
-  <div class="card">
-    <div class="card-hdr">
-      <div class="card-title">Pipeline entries</div>
-      <div class="sync-panel" style="margin:0;border:none;padding:0;gap:10px;">
-        <button class="abtn" id="sync-btn" onclick="fetchPipeline()" style="padding:6px 14px;font-size:12px;margin:0;">Sync from sheet</button>
-        <span id="sync-stat" style="font-size:11px;"></span>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:24px;margin-bottom:14px;flex-wrap:wrap;">
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;">Lead</div>
-        <div class="frow" id="fl-lead" style="margin:0;gap:5px;">
-          <div class="fchip on" data-dim="lead" data-val="all" onclick="setF(this,'lead')">All</div>
-          <div class="fchip" data-dim="lead" data-val="Alyson*" onclick="setF(this,'lead')">Alyson*</div>
-          <div class="fchip" data-dim="lead" data-val="Lucas" onclick="setF(this,'lead')">Lucas</div>
-          <div class="fchip" data-dim="lead" data-val="Elin" onclick="setF(this,'lead')">Elin</div>
-          <div class="fchip" data-dim="lead" data-val="Josh" onclick="setF(this,'lead')">Josh</div>
-        </div>
-      </div>
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;">Type</div>
-        <div class="frow" id="fl-type" style="margin:0;gap:5px;">
-          <div class="fchip on" data-dim="type" data-val="all" onclick="setF(this,'type')">All</div>
-          <div class="fchip" data-dim="type" data-val="Foundation" onclick="setF(this,'type')">Foundation</div>
-          <div class="fchip" data-dim="type" data-val="Individual" onclick="setF(this,'type')">Individual</div>
-          <div class="fchip" data-dim="type" data-val="Corporate" onclick="setF(this,'type')">Corporate</div>
-          <div class="fchip" data-dim="type" data-val="Dividend" onclick="setF(this,'type')">Dividend</div>
-          <div class="fchip" data-dim="type" data-val="Earned" onclick="setF(this,'type')">Earned</div>
-        </div>
-      </div>
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;">Quarter</div>
-        <div class="frow" id="fl-q" style="margin:0;gap:5px;">
-          <div class="fchip on" data-dim="quarter" data-val="all" onclick="setF(this,'quarter')">All</div>
-          <div class="fchip" data-dim="quarter" data-val="Q1" onclick="setF(this,'quarter')">Q1 Jul–Sep</div>
-          <div class="fchip" data-dim="quarter" data-val="Q2" onclick="setF(this,'quarter')">Q2 Oct–Dec</div>
-          <div class="fchip" data-dim="quarter" data-val="Q3" onclick="setF(this,'quarter')">Q3 Jan–Mar</div>
-          <div class="fchip" data-dim="quarter" data-val="Q4" onclick="setF(this,'quarter')">Q4 Apr–Jun</div>
-        </div>
-      </div>
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;">Estimate</div>
-        <div class="frow" id="fl-est" style="margin:0;gap:5px;">
-          <div class="fchip on" data-dim="est" data-val="all" onclick="setF(this,'est')">Both</div>
-          <div class="fchip" data-dim="est" data-val="conservative" onclick="setF(this,'est')">Conservative</div>
-          <div class="fchip" data-dim="est" data-val="optimistic" onclick="setF(this,'est')">Optimistic</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="pip-grid pip-head">
-      <span>Type</span><span>Month</span><span>Lead</span><span>Status</span>
-      <span style="text-align:right" id="pip-col-c">Conservative</span><span style="text-align:right" id="pip-col-o">Optimistic</span>
+      <span style="text-align:right">Conservative</span><span style="text-align:right">Optimistic</span>
       <span>Purpose</span><span></span>
     </div>
     <div id="pip-rows"></div>
@@ -937,7 +775,7 @@ const GS_BASE='https://sheets.googleapis.com/v4/spreadsheets';
 const fmt=n=>n>=1e6?'$'+(n/1e6).toFixed(2)+'M':n>=1e3?'$'+Math.round(n/1e3)+'K':'$'+Math.round(n);
 const fmtF=n=>(n<0?'(':'')+'$'+Math.abs(Math.round(n)).toLocaleString()+(n<0?')':'');
 
-let role=null, fcChart=null, pipF={lead:'all',type:'all',quarter:'all',est:'all'};
+let role=null, fcChart=null, pipF={lead:'all',type:'all',quarter:'all'};
 let S={
   chase:834117,debt:67078,chaseDate:'',
   mm1:537731,mm2:1312012,endowment:1322973,eai:103627,invDate:'',
@@ -1116,8 +954,6 @@ function filtered(){
     if(pipF.lead!=='all'&&p.lead!==pipF.lead) return false;
     if(pipF.type!=='all'&&p.type!==pipF.type) return false;
     if(pipF.quarter!=='all'&&(MQ[p.mo]||'')!==pipF.quarter) return false;
-    if(pipF.est==='conservative'&&p.con===0) return false;
-    if(pipF.est==='optimistic'&&p.opt===0) return false;
     return true;
   });
 }
@@ -1133,7 +969,6 @@ function renderPipeline(){
   const rows=filtered();
   document.getElementById('pf-c').textContent=fmtF(rows.reduce((a,p)=>a+p.con,0));
   document.getElementById('pf-o').textContent=fmtF(rows.reduce((a,p)=>a+p.opt,0));
-  const estF=pipF.est;const cC=document.getElementById('pip-col-c'),cO=document.getElementById('pip-col-o');if(cC)cC.style.fontWeight=estF==='conservative'?'700':'400';if(cO)cO.style.fontWeight=estF==='optimistic'?'700':'400';
   const tC={Foundation:'g',Individual:'n',Corporate:'b',Dividend:'y',Earned:'y'};
   const lC={'Alyson*':'y',Lucas:'g',Elin:'b',Josh:'g'};
   document.getElementById('pip-rows').innerHTML=rows.map(p=>{
@@ -1269,25 +1104,22 @@ function initCharts(){
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────
-function tSrc(id){const el=document.getElementById(id),arr=document.getElementById(id+'-a'),open=el.style.display==='none';el.style.display=open?'block':'none';if(arr)arr.style.transform=open?'rotate(180deg)':'rotate(0deg)';}
-
-function initTooltips(){document.querySelectorAll('.tip-wrap').forEach(w=>{const icon=w.querySelector('.tip-icon'),box=w.querySelector('.tip-box');if(!icon||!box)return;icon.addEventListener('mouseenter',()=>{const r=icon.getBoundingClientRect();box.style.left=Math.max(10,r.left+r.width/2-130)+'px';box.style.top=(r.top-8)+'px';box.style.transform='translateY(-100%)';});});}
+function safeSet(id,val,prop){prop=prop||'textContent';var el=document.getElementById(id);if(el)el[prop]=val;}
 
 function init(){
-  load(); refreshAll(); initCharts(); initTooltips();
+  load(); refreshAll(); initCharts();
   if(S.expMonthly&&S.expMonthly.length){
-    const ts=S.expFetchedAt?new Date(S.expFetchedAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
-    if(ts){document.getElementById('sync-exp-stat').textContent='✓ Last synced '+ts; document.getElementById('sync-exp-stat').style.color='var(--b2)';}
-    const total=S.expMonthly.reduce((a,b)=>a+b,0);
-    const top3=S.expMonthly.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v).slice(0,3).map(x=>FY_MOS[x.i].slice(0,3)+'('+fmt(x.v)+')').join(' · ');
-    const et=document.getElementById('exp-tbl');
-    if(et) et.innerHTML=`<p style="font-size:11px;color:var(--muted);margin-top:8px;">Budget synced · Total: <strong>${fmtF(total)}</strong> · Highest: ${top3}</p>`;
+    var ts=S.expFetchedAt?new Date(S.expFetchedAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
+    if(ts){safeSet('sync-exp-stat','✓ Last synced '+ts);safeSet('sync-exp-stat','var(--b2)','style.color');}
+    var total=S.expMonthly.reduce(function(a,b){return a+b;},0);
+    var top3=S.expMonthly.map(function(v,i){return{v:v,i:i};}).sort(function(a,b){return b.v-a.v;}).slice(0,3).map(function(x){return FY_MOS[x.i].slice(0,3)+'('+fmt(x.v)+')';}).join(' · ');
+    var et=document.getElementById('exp-tbl');
+    if(et)et.innerHTML='<p style="font-size:11px;color:var(--muted);margin-top:8px;">Budget synced &middot; Total: <strong>'+fmtF(total)+'</strong> &middot; Highest: '+top3+'</p>';
   }
   if(S.pipelineFetchedAt){
-    const ts=new Date(S.pipelineFetchedAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
-    ['sync-stat','sync-stat2'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent='✓ Last synced '+ts;el.style.color='var(--g2)';}});
+    var ts2=new Date(S.pipelineFetchedAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    ['sync-stat','sync-stat2'].forEach(function(id){var el=document.getElementById(id);if(el){el.textContent='✓ Last synced '+ts2;el.style.color='var(--g2)';}});
   }
-}
-</script>
+}</script>
 </body>
 </html>
