@@ -116,11 +116,11 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
 .slider-wrap .sv{font-weight:600;color:var(--ink);min-width:55px;text-align:right;}
 
 /* ─── TOOLTIP ────────────────────────────────────────────────────── */
-.tip-wrap{position:relative;display:inline-flex;align-items:center;}
-.tip-icon{width:15px;height:15px;border-radius:50%;background:var(--rule);color:var(--faint);font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:help;flex-shrink:0;user-select:none;}
-.tip-icon:hover{background:var(--g5);color:var(--g0);}
-.tip-box{display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 8px);width:260px;background:var(--g0);color:rgba(255,255,255,.9);font-size:12px;line-height:1.6;padding:10px 14px;border-radius:8px;z-index:200;pointer-events:none;font-weight:400;}
-.tip-box::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--g0);}
+.tip-wrap{display:inline-flex;align-items:center;}
+.tip-icon{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:help;flex-shrink:0;user-select:none;border:1px solid rgba(255,255,255,.3);transition:background .15s;}
+.tip-icon:hover{background:rgba(255,255,255,.45);}
+.tip-box{display:none;position:fixed;width:260px;background:var(--g0);color:rgba(255,255,255,.92);font-size:12px;line-height:1.65;padding:10px 14px;border-radius:8px;z-index:9999;pointer-events:none;font-weight:400;box-shadow:0 4px 20px rgba(0,0,0,.35);}
+.tip-box::after{content:'';position:absolute;top:100%;left:16px;border:5px solid transparent;border-top-color:var(--g0);}
 .tip-wrap:hover .tip-box{display:block;}
 
 /* ─── ADMIN PANEL ────────────────────────────────────────────────── */
@@ -259,30 +259,49 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
   <button class="ntab" onclick="go('pipeline',this)">Pipeline</button>
   <button class="ntab" onclick="go('forecast',this)">Forecast</button>
   <button class="ntab" onclick="go('history',this)">History</button>
+  <button class="ntab" onclick="go('sops',this)">SOPs</button>
+  <button class="ntab" onclick="go('help',this)">Help</button>
 </nav>
 
 <!-- ══════════════════════ DASHBOARD ═════════════════════════════════ -->
 <div class="page active" id="page-dashboard">
 
+  <details class="how-to-panel" style="background:var(--b6);border:.5px solid var(--b4);border-radius:8px;margin-bottom:18px;">
+    <summary style="padding:11px 16px;cursor:pointer;font-size:12px;font-weight:600;color:var(--b1);list-style:none;display:flex;align-items:center;justify-content:space-between;">
+      <span>? How to use this tab &#8212; Dashboard</span>
+      <span style="font-size:10px;color:var(--b4);">Click to expand</span>
+    </summary>
+    <div style="padding:4px 16px 14px;border-top:.5px solid var(--b4);">
+      <ul style="font-size:12px;color:var(--b0);line-height:1.8;padding-left:18px;margin-top:10px;">
+        <li style="margin-bottom:6px;">This is your at-a-glance view. Check it first whenever you open the tool.</li>
+        <li style="margin-bottom:6px;"><strong>Chase cash</strong> = what's in your operating account right now. <strong>Liquid reserves</strong> = the two WF money market accounts you can access within 1–2 days. <strong>Endowment</strong> = board-designated; needs a formal board vote to access.</li>
+        <li style="margin-bottom:6px;"><strong>Total liquid cash</strong> (green) = Chase + MM reserves. This is the number to watch for day-to-day operations.</li>
+        <li style="margin-bottom:6px;">The <strong>months covered</strong> number shows how long you can operate at the current burn rate without raising another dollar. Target: 6+ months.</li>
+        <li style="margin-bottom:6px;">Drag the <strong>Monthly burn</strong> slider to see how different expense levels change your runway.</li>
+        <li style="margin-bottom:6px;">The <strong>pipeline bar</strong> shows the range between conservative and optimistic revenue estimates.</li>
+        <li style="margin-bottom:6px;">Hover over any <strong>?</strong> icon for a quick definition.</li>
+      </ul>
+    </div>
+  </details>
   <!-- Three big balance cards -->
   <div class="bal-grid">
     <div class="bal-card green">
       <div class="bal-label">Chase cash
-        <div class="tip-wrap"><span class="tip-icon">i</span><div class="tip-box">Your operating checking account at Chase. This is immediately spendable — no action required.</div></div>
+        <div class="tip-wrap"><span class="tip-icon">?</span><div class="tip-box">Your operating checking account at Chase. This is immediately spendable — no action required.</div></div>
       </div>
       <div class="bal-value" id="d-chase">—</div>
       <div class="bal-sub" id="d-chase-dt">Operating account</div>
     </div>
     <div class="bal-card green">
       <div class="bal-label">Liquid reserves
-        <div class="tip-wrap"><span class="tip-icon">i</span><div class="tip-box">Money market accounts 1005-7413 (EBR) and 8847-4912 (yield). Accessible within 1–2 business days via a redemption request to your WF advisor.</div></div>
+        <div class="tip-wrap"><span class="tip-icon">?</span><div class="tip-box">Money market accounts 1005-7413 (EBR) and 8847-4912 (yield). Accessible within 1–2 business days via a redemption request to your WF advisor.</div></div>
       </div>
       <div class="bal-value" id="d-liq">—</div>
       <div class="bal-sub">Accts 7413 + 4912 · WF</div>
     </div>
     <div class="bal-card blue">
       <div class="bal-label">Endowment
-        <div class="tip-wrap"><span class="tip-icon">i</span><div class="tip-box">Account 8805-0682 — board-designated endowment. The board can vote to access principal if needed, but it requires a formal board vote. Not day-to-day liquidity.</div></div>
+        <div class="tip-wrap"><span class="tip-icon">?</span><div class="tip-box">Account 8805-0682 — board-designated endowment. The board can vote to access principal if needed, but it requires a formal board vote. Not day-to-day liquidity.</div></div>
       </div>
       <div class="bal-value" id="d-end">—</div>
       <div class="bal-sub">Acct 8805-0682 · WF · Board vote required</div>
@@ -364,6 +383,17 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
 
 <!-- ══════════════════════ CASH POSITION ══════════════════════════════ -->
 <div class="page" id="page-cash">
+  <details class="how-to-panel" style="background:var(--b6);border:.5px solid var(--b4);border-radius:8px;margin-bottom:18px;">
+    <summary style="padding:11px 16px;cursor:pointer;font-size:12px;font-weight:600;color:var(--b1);list-style:none;display:flex;align-items:center;justify-content:space-between;">
+      <span>? How to use this tab &#8212; Cash Position</span>
+      <span style="font-size:10px;color:var(--b4);">Click to expand</span>
+    </summary>
+    <div style="padding:4px 16px 14px;border-top:.5px solid var(--b4);">
+      <ul style="font-size:12px;color:var(--b0);line-height:1.8;padding-left:18px;margin-top:10px;">
+        <li style="margin-bottom:6px;">Use this tab to answer: <strong>where do we stand right now, and where will we be at the end of this period?</strong></li><li style="margin-bottom:6px;">Update <strong>Chase cash</strong> and <strong>debt</strong> after every bank statement (or whenever you get a significant update). Click "Sign in as Admin" to see the update panel.</li><li style="margin-bottom:6px;"><strong>Debt + credit cards</strong> includes AP, payroll liabilities, and any outstanding credit card balances not yet cleared.</li><li style="margin-bottom:6px;">Set <strong>Months to model</strong> to the period you're planning for (e.g. 3 = July through September).</li><li style="margin-bottom:6px;"><strong>Anticipated revenue</strong> = what you expect to come in during that window. <strong>Confirmed additional</strong> = revenue you're certain of regardless.</li><li style="margin-bottom:6px;">The bar chart shows how cash flows in and out. The bottom bar is your projected ending cash.</li><li style="margin-bottom:6px;"><strong>This tab vs. Forecast:</strong> Cash Position uses known, near-term numbers. Forecast uses your full pipeline over a longer horizon. Use Cash Position weekly; use Forecast for board conversations and fundraising strategy.</li>
+      </ul>
+    </div>
+  </details>
   <div class="fn" style="margin-bottom:16px;font-size:13px;color:var(--muted);">
     <strong style="color:var(--ink);">Cash position</strong> shows where you stand right now and projects a specific near-term window based on known revenue and expected expenses. Update balances after each bank statement.
     <span style="display:inline-block;background:var(--b6);border-radius:4px;padding:2px 8px;font-size:11px;color:var(--b2);margin-left:8px;font-weight:600;">
@@ -411,6 +441,17 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
 
 <!-- ══════════════════════ INVESTMENTS ═══════════════════════════════ -->
 <div class="page" id="page-investments">
+  <details class="how-to-panel" style="background:var(--b6);border:.5px solid var(--b4);border-radius:8px;margin-bottom:18px;">
+    <summary style="padding:11px 16px;cursor:pointer;font-size:12px;font-weight:600;color:var(--b1);list-style:none;display:flex;align-items:center;justify-content:space-between;">
+      <span>? How to use this tab &#8212; Investments</span>
+      <span style="font-size:10px;color:var(--b4);">Click to expand</span>
+    </summary>
+    <div style="padding:4px 16px 14px;border-top:.5px solid var(--b4);">
+      <ul style="font-size:12px;color:var(--b0);line-height:1.8;padding-left:18px;margin-top:10px;">
+        <li style="margin-bottom:6px;">This tab tracks your three Wells Fargo accounts and what the portfolio is actually earning.</li><li style="margin-bottom:6px;"><strong>1005-7413 (EBR)</strong> and <strong>8847-4912 (Yield)</strong> are money market operating reserves — liquid, accessible within 1–2 business days by calling Kevin.</li><li style="margin-bottom:6px;"><strong>8805-0682 (Endowment)</strong> is board-designated. The board can vote to access principal, but it requires a formal vote. It is not day-to-day liquidity.</li><li style="margin-bottom:6px;">Update account balances monthly after your WF statement arrives. Admin panel is the gold section at the top.</li><li style="margin-bottom:6px;"><strong>Earned YTD</strong> comes from the most recent entry in the advisor update log. It reflects actual portfolio performance — different from what Molly journals (see below).</li><li style="margin-bottom:6px;"><strong>Molly's taxable income entries</strong> are IRS bookkeeping figures — dividends declared by funds per tax rules. They are not the same as what the portfolio earned in market terms. Use Kevin's numbers or the WF portal for the real picture.</li><li style="margin-bottom:6px;">The <strong>IPS spending policy</strong> section (collapsed at the bottom) shows how much the board has authorized to withdraw from the MM accounts annually. FY26 draw exceeded authorization — flagged as a policy exception.</li><li style="margin-bottom:6px;">Log every Kevin update in the <strong>Advisor update log</strong> — even between monthly statements. This creates a running record and populates the Earned YTD card.</li>
+      </ul>
+    </div>
+  </details>
 
   <div id="inv-admin" style="display:none">
     <div class="apanel">
@@ -435,7 +476,7 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
   </div>
   <div class="two-col" style="margin-bottom:18px;">
     <div class="bal-card" style="border-top:3px solid var(--g2)"><div class="bal-label">Earned YTD
-        <div class="tip-wrap"><span class="tip-icon">i</span><div class="tip-box">From the most recent Kevin/advisor update logged below. This is the actual portfolio performance figure — total return including both income and appreciation. Not the same as Molly's taxable income entries.</div></div>
+        <div class="tip-wrap"><span class="tip-icon">?</span><div class="tip-box">From the most recent Kevin/advisor update logged below. This is the actual portfolio performance figure — total return including both income and appreciation. Not the same as Molly's taxable income entries.</div></div>
       </div>
       <div class="bal-value" id="iv-ytd-d" style="color:var(--g2)">—</div>
       <div class="bal-sub" id="iv-ytd-sub">Log an advisor update below to populate</div>
@@ -521,7 +562,7 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
   <div class="card">
     <div class="card-hdr">
       <div class="card-title">Advisor update log — Kevin / WF reports</div>
-      <div class="tip-wrap"><span class="tip-icon">i</span><div class="tip-box" style="width:280px;">Log entries after any call or email from Kevin. These populate the Earned YTD figure above. Note: entries are saved locally to this browser — not shared across devices.</div></div>
+      <div class="tip-wrap"><span class="tip-icon">?</span><div class="tip-box" style="width:280px;">Log entries after any call or email from Kevin. These populate the Earned YTD figure above. Note: entries are saved locally to this browser — not shared across devices.</div></div>
     </div>
     <div id="wf-log-list"><p style="font-size:13px;color:var(--faint)">No updates logged yet.</p></div>
   </div>
@@ -570,6 +611,17 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
 
 <!-- ══════════════════════ PIPELINE ═══════════════════════════════════ -->
 <div class="page" id="page-pipeline">
+  <details class="how-to-panel" style="background:var(--b6);border:.5px solid var(--b4);border-radius:8px;margin-bottom:18px;">
+    <summary style="padding:11px 16px;cursor:pointer;font-size:12px;font-weight:600;color:var(--b1);list-style:none;display:flex;align-items:center;justify-content:space-between;">
+      <span>? How to use this tab &#8212; Pipeline</span>
+      <span style="font-size:10px;color:var(--b4);">Click to expand</span>
+    </summary>
+    <div style="padding:4px 16px 14px;border-top:.5px solid var(--b4);">
+      <ul style="font-size:12px;color:var(--b0);line-height:1.8;padding-left:18px;margin-top:10px;">
+        <li style="margin-bottom:6px;">This is your fundraising pipeline — every prospective gift with a conservative and optimistic estimate.</li><li style="margin-bottom:6px;">Click <strong>Sync from sheet</strong> to pull the latest data from your Google Sheet. Requires internet. The sheet it reads is <strong>Fundraising Revenue_Forecast_Planning</strong> (tab: No Names_FY27 Revenue).</li><li style="margin-bottom:6px;">Use the filters to focus: <strong>Lead</strong> narrows by who owns the relationship. <strong>Type</strong> filters by donor category. <strong>Quarter</strong> groups by when you expect the gift. <strong>Estimate</strong> highlights conservative or optimistic values.</li><li style="margin-bottom:6px;"><strong>Overdue asks</strong> = pledges where the expected month has passed and status isn't Committed. These are flagged red — they need follow-up.</li><li style="margin-bottom:6px;">Admins can add and delete rows. Use <strong>↺ Reset to defaults</strong> to restore the seed data if something goes wrong.</li><li style="margin-bottom:6px;">The totals at the bottom reflect the <em>filtered</em> view, not the full pipeline. Switch all filters to "All" to see the full picture.</li>
+      </ul>
+    </div>
+  </details>
   <div id="pip-admin" style="display:none">
     <div class="apanel">
       <div class="apanel-title">✏ Add pledge</div>
@@ -660,6 +712,17 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
 
 <!-- ══════════════════════ FORECAST ═══════════════════════════════════ -->
 <div class="page" id="page-forecast">
+  <details class="how-to-panel" style="background:var(--b6);border:.5px solid var(--b4);border-radius:8px;margin-bottom:18px;">
+    <summary style="padding:11px 16px;cursor:pointer;font-size:12px;font-weight:600;color:var(--b1);list-style:none;display:flex;align-items:center;justify-content:space-between;">
+      <span>? How to use this tab &#8212; Forecast</span>
+      <span style="font-size:10px;color:var(--b4);">Click to expand</span>
+    </summary>
+    <div style="padding:4px 16px 14px;border-top:.5px solid var(--b4);">
+      <ul style="font-size:12px;color:var(--b0);line-height:1.8;padding-left:18px;margin-top:10px;">
+        <li style="margin-bottom:6px;">Use this tab for longer-horizon planning: <strong>how far does our revenue stretch, and when do we need to raise?</strong></li><li style="margin-bottom:6px;">Click <strong>Sync pipeline</strong> to load the latest pledge data. Click <strong>Sync expenses</strong> to pull monthly budget actuals from your Google Sheet — when synced, the forecast uses real budgeted figures instead of the burn rate average.</li><li style="margin-bottom:6px;"><strong>Monthly burn rate</strong> is a fallback used when expense data hasn't been synced. Once synced, real monthly budget figures drive the projection.</li><li style="margin-bottom:6px;"><strong>Revenue confidence</strong> applies a discount to your pipeline total (e.g. 80% = you expect to close 80% of what's in the pipeline). Committed pledges aren't discounted.</li><li style="margin-bottom:6px;">Toggle <strong>Use optimistic pipeline</strong> to switch between conservative and optimistic revenue scenarios.</li><li style="margin-bottom:6px;">The <strong>month-by-month chart</strong> shows projected cash over time. The red dashed line = 3-month expense buffer. Months where your line dips below that line are fundraising urgency windows.</li><li style="margin-bottom:6px;">The <strong>"When do we need to raise?"</strong> table flags those months explicitly — use this for board conversations.</li><li style="margin-bottom:6px;"><strong>This tab vs. Cash Position:</strong> Forecast models your full pipeline over months. Cash Position reflects known numbers for a near-term window. Both are useful; they answer different questions.</li>
+      </ul>
+    </div>
+  </details>
   <div style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.7;">
     <strong style="color:var(--ink);">Forecast</strong> uses your full pipeline and models how far revenue stretches against monthly burn over time — up to 18 months. It answers: <em>when do we need to raise?</em>
     <span style="display:inline-block;background:#d3eba7;border-radius:4px;padding:2px 8px;font-size:11px;color:var(--g1);margin-left:8px;font-weight:600;">
@@ -708,6 +771,17 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
 
 <!-- ══════════════════════ HISTORY ════════════════════════════════════ -->
 <div class="page" id="page-history">
+  <details class="how-to-panel" style="background:var(--b6);border:.5px solid var(--b4);border-radius:8px;margin-bottom:18px;">
+    <summary style="padding:11px 16px;cursor:pointer;font-size:12px;font-weight:600;color:var(--b1);list-style:none;display:flex;align-items:center;justify-content:space-between;">
+      <span>? How to use this tab &#8212; History</span>
+      <span style="font-size:10px;color:var(--b4);">Click to expand</span>
+    </summary>
+    <div style="padding:4px 16px 14px;border-top:.5px solid var(--b4);">
+      <ul style="font-size:12px;color:var(--b0);line-height:1.8;padding-left:18px;margin-top:10px;">
+        <li style="margin-bottom:6px;">This tab provides financial context — where BRYC has been and how the reserve position has evolved.</li><li style="margin-bottom:6px;"><strong>990 financials</strong> are pulled from IRS Form 990 filings via ProPublica (EIN 26-2477597). The most recent filing reflects FY ending June 30, 2025.</li><li style="margin-bottom:6px;"><strong>FY2024 revenue ($6.36M)</strong> is elevated by the $1.5M EBRPSS investment — not representative of operating revenue.</li><li style="margin-bottom:6px;">The <strong>reserve coverage chart</strong> shows months of operating expenses covered by reserves. Red line = 6-month sector minimum (NORI standard). Blue dashed = 8-month BRYC target.</li><li style="margin-bottom:6px;">FY26 (7.9 months covered) is the strongest reserve position in BRYC's history.</li><li style="margin-bottom:6px;">Year context notes explain what drove each year's results — useful for board presentations and grant narratives.</li>
+      </ul>
+    </div>
+  </details>
   <div class="two-col" style="align-items:start;">
     <div>
       <div class="card">
@@ -756,6 +830,698 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
         <div class="yr-note">First surplus since expansion. Combined coverage ~7.9 months — strongest reserve position in BRYC history.</div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ HELP ═══════════════════════════════════════ -->
+<div class="page" id="page-help">
+  <div style="max-width:760px;">
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:16px;">Quick start</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="background:var(--bg);border-radius:8px;padding:14px 16px;">
+          <div style="font-size:12px;font-weight:700;color:var(--g2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;">Weekly habit</div>
+          <ol style="font-size:13px;color:var(--muted);line-height:1.9;padding-left:18px;">
+            <li>Open <strong>Dashboard</strong> &#8212; check months covered</li>
+            <li>Open <strong>Cash position</strong> &#8212; update Chase balance if statement arrived</li>
+            <li>Open <strong>Pipeline</strong> &#8212; sync from sheet, flag overdue asks</li>
+          </ol>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:14px 16px;">
+          <div style="font-size:12px;font-weight:700;color:var(--b2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;">Monthly habit</div>
+          <ol style="font-size:13px;color:var(--muted);line-height:1.9;padding-left:18px;">
+            <li>Update <strong>WF balances</strong> on the Investments tab after statement arrives</li>
+            <li>Log any <strong>Kevin updates</strong> in the advisor log</li>
+            <li>Sync <strong>expenses</strong> on the Forecast tab</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:16px;">Key definitions</div>
+      <div style="display:grid;gap:2px;">
+
+        <details style="border:.5px solid var(--rule);border-radius:6px;overflow:hidden;margin-bottom:4px;">
+          <summary style="padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);list-style:none;display:flex;justify-content:space-between;">Chase cash <span style="color:var(--faint);font-weight:400;">&#9660;</span></summary>
+          <div style="padding:8px 14px 12px;font-size:13px;color:var(--muted);line-height:1.7;border-top:.5px solid var(--rule);">Your operating checking account at Chase. This is immediately spendable — no phone call, no approval, no wait. The number you use for payroll and vendor payments.</div>
+        </details>
+
+        <details style="border:.5px solid var(--rule);border-radius:6px;overflow:hidden;margin-bottom:4px;">
+          <summary style="padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);list-style:none;display:flex;justify-content:space-between;">Liquid reserves (MM accounts) <span style="color:var(--faint);font-weight:400;">&#9660;</span></summary>
+          <div style="padding:8px 14px 12px;font-size:13px;color:var(--muted);line-height:1.7;border-top:.5px solid var(--rule);">Accounts 1005-7413 (EBR) and 8847-4912 (Yield) at Wells Fargo. These are money market funds — low risk, earning ~3.6% annually. Accessible within 1–2 business days by calling Kevin or submitting a redemption request. Not instant like Chase, but close.</div>
+        </details>
+
+        <details style="border:.5px solid var(--rule);border-radius:6px;overflow:hidden;margin-bottom:4px;">
+          <summary style="padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);list-style:none;display:flex;justify-content:space-between;">Board-designated endowment <span style="color:var(--faint);font-weight:400;">&#9660;</span></summary>
+          <div style="padding:8px 14px 12px;font-size:13px;color:var(--muted);line-height:1.7;border-top:.5px solid var(--rule);">Account 8805-0682. The board has designated this as an endowment — meaning it's set aside for long-term stability. <strong>It is not donor-restricted</strong> (no external legal requirement to keep it), but accessing principal requires a formal board vote. Think of it as a last-resort backstop, not operating cash. The investment income it earns does not require a board vote.</div>
+        </details>
+
+        <details style="border:.5px solid var(--rule);border-radius:6px;overflow:hidden;margin-bottom:4px;">
+          <summary style="padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);list-style:none;display:flex;justify-content:space-between;">Operating runway / months covered <span style="color:var(--faint);font-weight:400;">&#9660;</span></summary>
+          <div style="padding:8px 14px 12px;font-size:13px;color:var(--muted);line-height:1.7;border-top:.5px solid var(--rule);">How many months BRYC could operate at the current burn rate if no additional revenue came in. Calculated as: (Chase + MM reserves) ÷ monthly burn. <strong>Sector minimum: 3 months. NORI standard: 6 months. BRYC target: 8 months.</strong> BRYC's heavy revenue concentration in EBRPSS argues for staying closer to 9–12 months.</div>
+        </details>
+
+        <details style="border:.5px solid var(--rule);border-radius:6px;overflow:hidden;margin-bottom:4px;">
+          <summary style="padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);list-style:none;display:flex;justify-content:space-between;">IPS spending policy (4% rule) <span style="color:var(--faint);font-weight:400;">&#9660;</span></summary>
+          <div style="padding:8px 14px 12px;font-size:13px;color:var(--muted);line-height:1.7;border-top:.5px solid var(--rule);">BRYC's Investment Policy Statement sets a limit on annual withdrawals from the two MM operating reserve accounts: <strong>4% of the 3-year average June 30 balance</strong>. This smooths out market swings so you don't withdraw too much in a good year or too little in a bad one. FY27 authorization: ~$105K. FY26 actual draw: ~$250K — a policy exception that should be noted in board minutes.</div>
+        </details>
+
+        <details style="border:.5px solid var(--rule);border-radius:6px;overflow:hidden;margin-bottom:4px;">
+          <summary style="padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);list-style:none;display:flex;justify-content:space-between;">Conservative vs. optimistic pipeline <span style="color:var(--faint);font-weight:400;">&#9660;</span></summary>
+          <div style="padding:8px 14px 12px;font-size:13px;color:var(--muted);line-height:1.7;border-top:.5px solid var(--rule);"><strong>Conservative</strong> = the lower estimate for a gift — what you'd expect if the donor gives less than hoped or the ask isn't fully successful. <strong>Optimistic</strong> = the upper estimate — best case. The gap between them is your uncertainty range. Use conservative for budgeting; use optimistic for goal-setting.</div>
+        </details>
+
+        <details style="border:.5px solid var(--rule);border-radius:6px;overflow:hidden;margin-bottom:4px;">
+          <summary style="padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);list-style:none;display:flex;justify-content:space-between;">Earned YTD (investment accounts) <span style="color:var(--faint);font-weight:400;">&#9660;</span></summary>
+          <div style="padding:8px 14px 12px;font-size:13px;color:var(--muted);line-height:1.7;border-top:.5px solid var(--rule);">The actual dollars the portfolio has earned year-to-date — pulled from Kevin's updates or the WF Advisors portal (Investment Results column). This includes both income (dividends) and appreciation (portfolio going up in value). <strong>This is different from what Molly journals.</strong> Molly records taxable income per IRS rules — dividends declared by funds, which is an accounting figure. Kevin's number is the real economic picture.</div>
+        </details>
+
+        <details style="border:.5px solid var(--rule);border-radius:6px;overflow:hidden;margin-bottom:4px;">
+          <summary style="padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);list-style:none;display:flex;justify-content:space-between;">3-month buffer (forecast) <span style="color:var(--faint);font-weight:400;">&#9660;</span></summary>
+          <div style="padding:8px 14px 12px;font-size:13px;color:var(--muted);line-height:1.7;border-top:.5px solid var(--rule);">The minimum cash position BRYC wants to maintain at any point during the fiscal year — 3 months of operating expenses. In the Forecast tab, months where projected cash drops below this line are flagged as fundraising urgency windows. It doesn't mean you're in crisis; it means you need revenue to close in that window.</div>
+        </details>
+
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:16px;">Reminders and tips</div>
+      <div style="display:grid;gap:8px;">
+
+        <div style="background:var(--g6);border:.5px solid var(--g5);border-radius:8px;padding:13px 16px;">
+          <div style="font-size:12px;font-weight:700;color:var(--g1);margin-bottom:4px;">Sync buttons require internet</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.7;">The pipeline and expense sync buttons pull live data from Google Sheets. <strong>Pipeline data comes from the "Fundraising Revenue_Forecast_Planning" sheet</strong> (tab: No Names_FY27 Revenue). Expense data comes from the FY27 Operating Budget tab. They won't work if you're offline or if the Sheets API key has an issue. If a sync fails, the error message tells you what went wrong.</div>
+        </div>
+
+        <div style="background:var(--g6);border:.5px solid var(--g5);border-radius:8px;padding:13px 16px;">
+          <div style="font-size:12px;font-weight:700;color:var(--g1);margin-bottom:4px;">Data saves to this browser only</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.7;">WF balances, Chase balance, advisor log entries, and pipeline data save to your browser's local storage. They persist between sessions on the same device and browser, but won't appear on another person's machine or if you clear your browser data.</div>
+        </div>
+
+        <div style="background:var(--g6);border:.5px solid var(--g5);border-radius:8px;padding:13px 16px;">
+          <div style="font-size:12px;font-weight:700;color:var(--g1);margin-bottom:4px;">Admin vs. viewer access</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.7;">Admins can update balances, log advisor updates, add and delete pipeline entries. Viewers can see everything but not edit. Sign in with the Admin PIN to get full access. Share the URL with others who only need to view.</div>
+        </div>
+
+        <div style="background:var(--gold-lt);border:.5px solid #e0c060;border-radius:8px;padding:13px 16px;">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:4px;">Keep the PIN private</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.7;">The Admin PIN is set in the HTML file. Anyone who downloads the file can read the PIN, so share the live URL rather than the file itself. The current PIN is set to <strong>2025</strong> — change it in the file before sharing widely.</div>
+        </div>
+
+        <div style="background:var(--gold-lt);border:.5px solid #e0c060;border-radius:8px;padding:13px 16px;">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:4px;">The "This Year" column in WF statements resets January 1</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.7;">BRYC's fiscal year runs July–June. The WF statement's "This Year" column follows the calendar year (Jan–Dec) and resets every January. For fiscal year income totals, add up the "This Period" column across your July through June statements.</div>
+        </div>
+
+        <div style="background:var(--b6);border:.5px solid var(--b4);border-radius:8px;padding:13px 16px;">
+          <div style="font-size:12px;font-weight:700;color:var(--b1);margin-bottom:4px;">When to use each tab</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.7;">
+            <strong>Dashboard</strong> — daily/weekly gut check.<br>
+            <strong>Cash position</strong> — near-term projection with real numbers.<br>
+            <strong>Investments</strong> — after WF statement or Kevin call.<br>
+            <strong>Pipeline</strong> — after any update to the fundraising sheet.<br>
+            <strong>Forecast</strong> — board meetings, fundraising strategy conversations.<br>
+            <strong>History</strong> — grant narratives, annual reports, board context.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════ SOPs ═══════════════════════════════════════ -->
+<div class="page" id="page-sops">
+  <div style="max-width:820px;">
+    <div style="margin-bottom:18px;">
+      <p style="font-size:13px;color:var(--muted);line-height:1.7;">Step-by-step procedures for the seven core tasks in this dashboard. Click any process to expand it. These mirror the BRYC SOP format — Owner, When, What this is, numbered steps, Watch out.</p>
+    </div>
+
+    <details style="border:.5px solid var(--rule);border-radius:8px;margin-bottom:10px;overflow:hidden;">
+      <summary style="padding:13px 18px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--white);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:14px;font-weight:700;color:var(--ink);">Opening the dashboard</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">
+          <span style="font-size:11px;color:var(--faint);">Owner: Any staff member with the URL or file</span>
+          <span style="font-size:11px;color:var(--faint);">&#9660;</span>
+        </div>
+      </summary>
+      <div style="padding:0 18px 16px;border-top:.5px solid var(--rule);background:var(--white);">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0 14px;">
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">Owner</div>
+            <div style="font-size:12px;color:var(--ink);">Any staff member with the URL or file</div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">When</div>
+            <div style="font-size:12px;color:var(--ink);">Anytime — daily check or as needed</div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">What this is</div>
+            <div style="font-size:12px;color:var(--ink);">How to access and log in from any computer.</div>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;border:.5px solid var(--rule);border-radius:6px;overflow:hidden;">
+          <thead><tr style="background:var(--g1);">
+            <th style="width:60px;text-align:center;padding:8px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">Step</th>
+            <th style="text-align:left;padding:8px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">Item</th>
+          </tr></thead>
+          <tbody>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">1</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Open Chrome and go to the dashboard URL (<strong>thebryc.github.io/finance-dashboard</strong>) — or double-click the HTML file to open it locally.
+            
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">2</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            You will see a login screen with two options: <strong>Sign in as Admin</strong> or <strong>View only</strong>.
+            
+          </td>
+        </tr>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">3</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            To sign in as Admin: enter the Admin PIN and click the button. Admin access lets you update balances, log advisor updates, and edit the pipeline.
+            <br><em style="font-size:12px;color:var(--faint);">Note: Get the current PIN from Josh. Do not share it publicly.</em>
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">4</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            To sign in as Viewer: click "View only." You can see all data but cannot edit anything.
+            
+          </td>
+        </tr>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">5</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Use the tab bar at the top to navigate: Dashboard, Cash position, Investments, Pipeline, Forecast, History, SOPs, Help.
+            
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">6</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            On any tab, click the blue <strong>"? How to use this tab"</strong> bar at the top to expand a guide specific to that page.
+            
+          </td>
+        </tr></tbody>
+        </table>
+        <div style="background:var(--gold-lt);border:.5px solid var(--gold);border-radius:6px;padding:11px 14px;margin-top:12px;font-size:12px;color:var(--ink);line-height:1.7;">
+          <strong style="color:var(--amber);">Watch out:</strong> If the dashboard shows stale numbers, check whether data was last updated recently. Numbers are only as current as the last Admin who saved updates.
+        </div>
+        
+      </div>
+    </details>
+    <details style="border:.5px solid var(--rule);border-radius:8px;margin-bottom:10px;overflow:hidden;">
+      <summary style="padding:13px 18px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--white);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:14px;font-weight:700;color:var(--ink);">Updating cash balances (Chase + debt)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">
+          <span style="font-size:11px;color:var(--faint);">Owner: Josh Howard or designee</span>
+          <span style="font-size:11px;color:var(--faint);">&#9660;</span>
+        </div>
+      </summary>
+      <div style="padding:0 18px 16px;border-top:.5px solid var(--rule);background:var(--white);">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0 14px;">
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">Owner</div>
+            <div style="font-size:12px;color:var(--ink);">Josh Howard or designee — Admin required</div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">When</div>
+            <div style="font-size:12px;color:var(--ink);">Monthly, after Chase statement arrives, or after any significant balance change</div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">What this is</div>
+            <div style="font-size:12px;color:var(--ink);">How to update the Chase operating account balance and outstanding debt.</div>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;border:.5px solid var(--rule);border-radius:6px;overflow:hidden;">
+          <thead><tr style="background:var(--g1);">
+            <th style="width:60px;text-align:center;padding:8px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">Step</th>
+            <th style="text-align:left;padding:8px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">Item</th>
+          </tr></thead>
+          <tbody>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">1</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Sign in as Admin. Click the <strong>Cash position</strong> tab.
+            
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">2</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            The gold panel at the top is labeled <strong>✏ Update cash balances</strong>. Enter the current Chase account balance.
+            
+          </td>
+        </tr>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">3</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Enter total current debt in the second field — includes AP, payroll liabilities, and all credit card balances not yet paid.
+            <br><em style="font-size:12px;color:var(--faint);">Note: When in doubt, include everything owed that has not cleared the bank.</em>
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">4</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Set the "As-of date" to the statement date. Click <strong>Save</strong>. KPI cards and the Dashboard tab update immediately.
+            
+          </td>
+        </tr></tbody>
+        </table>
+        <div style="background:var(--gold-lt);border:.5px solid var(--gold);border-radius:6px;padding:11px 14px;margin-top:12px;font-size:12px;color:var(--ink);line-height:1.7;">
+          <strong style="color:var(--amber);">Watch out:</strong> These numbers save to your browser only — they will not appear on someone else's machine. If another team member needs current numbers, they must update their own copy.
+        </div>
+        <div style="margin-top:12px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;">Linked resources</div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:var(--g1);">
+              <th style="text-align:left;padding:7px 12px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;">Resource</th>
+              <th style="text-align:left;padding:7px 12px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;">Link / Contact</th>
+            </tr></thead>
+            <tbody><tr style="background:#f4faf9;">
+            <td style="padding:8px 12px;font-size:12px;border-bottom:.5px solid var(--rule);">Chase online banking</td>
+            <td style="padding:8px 12px;font-size:12px;border-bottom:.5px solid var(--rule);color:var(--b2);">chase.com</td>
+          </tr></tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+    <details style="border:.5px solid var(--rule);border-radius:8px;margin-bottom:10px;overflow:hidden;">
+      <summary style="padding:13px 18px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--white);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:14px;font-weight:700;color:var(--ink);">Updating WF investment account balances</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">
+          <span style="font-size:11px;color:var(--faint);">Owner: Josh Howard or designee</span>
+          <span style="font-size:11px;color:var(--faint);">&#9660;</span>
+        </div>
+      </summary>
+      <div style="padding:0 18px 16px;border-top:.5px solid var(--rule);background:var(--white);">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0 14px;">
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">Owner</div>
+            <div style="font-size:12px;color:var(--ink);">Josh Howard or designee — Admin required</div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">When</div>
+            <div style="font-size:12px;color:var(--ink);">Monthly, after WF statement arrives</div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">What this is</div>
+            <div style="font-size:12px;color:var(--ink);">How to update the three WF account balances on the Investments tab.</div>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;border:.5px solid var(--rule);border-radius:6px;overflow:hidden;">
+          <thead><tr style="background:var(--g1);">
+            <th style="width:60px;text-align:center;padding:8px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">Step</th>
+            <th style="text-align:left;padding:8px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">Item</th>
+          </tr></thead>
+          <tbody>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">1</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Open your monthly WF Combined Snapshot statement (email or at wellsfargoadvisors.com). Find the table <strong>"What's inside your Combined Snapshot."</strong>
+            
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">2</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Note the balances for all three accounts: <strong>1005-7413</strong> (EBR reserve), <strong>8847-4912</strong> (yield reserve), <strong>8805-0682</strong> (endowment).
+            
+          </td>
+        </tr>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">3</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            In the dashboard, click <strong>Investments</strong>, sign in as Admin. The gold panel is labeled <strong>✏ Update WF account balances</strong>.
+            
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">4</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Enter each balance. Optionally enter Est. annual income from the Combined portfolio summary page (far-right column, bottom row).
+            <br><em style="font-size:12px;color:var(--faint);">Note: This income figure is an IRS estimate — not cash you can spend. Use Kevin's numbers for the real economic picture.</em>
+          </td>
+        </tr>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">5</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Set the statement date and click <strong>Save</strong>. KPI cards and the IPS spending policy calculation update automatically.
+            
+          </td>
+        </tr></tbody>
+        </table>
+        <div style="background:var(--gold-lt);border:.5px solid var(--gold);border-radius:6px;padding:11px 14px;margin-top:12px;font-size:12px;color:var(--ink);line-height:1.7;">
+          <strong style="color:var(--amber);">Watch out:</strong> The "This Year" column in WF statements resets January 1 — it does not match BRYC's fiscal year (July–June). For fiscal year totals, add "This Period" from July through June statements.
+        </div>
+        <div style="margin-top:12px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;">Linked resources</div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:var(--g1);">
+              <th style="text-align:left;padding:7px 12px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;">Resource</th>
+              <th style="text-align:left;padding:7px 12px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;">Link / Contact</th>
+            </tr></thead>
+            <tbody><tr style="background:#f4faf9;">
+            <td style="padding:8px 12px;font-size:12px;border-bottom:.5px solid var(--rule);">WF Advisors portal</td>
+            <td style="padding:8px 12px;font-size:12px;border-bottom:.5px solid var(--rule);color:var(--b2);">wellsfargoadvisors.com</td>
+          </tr><tr style="background:#fff;">
+            <td style="padding:8px 12px;font-size:12px;border-bottom:.5px solid var(--rule);">Kevin Knobloch / James Poche (WF)</td>
+            <td style="padding:8px 12px;font-size:12px;border-bottom:.5px solid var(--rule);color:var(--b2);">225-612-7640</td>
+          </tr></tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+    <details style="border:.5px solid var(--rule);border-radius:8px;margin-bottom:10px;overflow:hidden;">
+      <summary style="padding:13px 18px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--white);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:14px;font-weight:700;color:var(--ink);">Logging a WF advisor update (Kevin)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">
+          <span style="font-size:11px;color:var(--faint);">Owner: Josh Howard or designee</span>
+          <span style="font-size:11px;color:var(--faint);">&#9660;</span>
+        </div>
+      </summary>
+      <div style="padding:0 18px 16px;border-top:.5px solid var(--rule);background:var(--white);">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0 14px;">
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">Owner</div>
+            <div style="font-size:12px;color:var(--ink);">Josh Howard or designee — Admin required</div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">When</div>
+            <div style="font-size:12px;color:var(--ink);">After any call, email, or report from Kevin or James at WF — even between monthly statements</div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">What this is</div>
+            <div style="font-size:12px;color:var(--ink);">How to log an off-cycle advisor update so Earned YTD stays current and a running record is maintained.</div>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;border:.5px solid var(--rule);border-radius:6px;overflow:hidden;">
+          <thead><tr style="background:var(--g1);">
+            <th style="width:60px;text-align:center;padding:8px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">Step</th>
+            <th style="text-align:left;padding:8px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">Item</th>
+          </tr></thead>
+          <tbody>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">1</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            After a Kevin call or email, note: account value (as of what date), YTD earnings ($), YTD return (%), and allocation (% stocks, bonds, alternatives). Note any cash movements or planned actions.
+            
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">2</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Alternatively, pull directly from the portal: <strong>wellsfargoadvisors.com</strong> → select account → <strong>Performance tab</strong> for YTD%, and the <strong>Investment Results table</strong> for dollar earnings (the "Investment Results" column = actual dollars earned net of your own deposits/withdrawals).
+            
+          </td>
+        </tr>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">3</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            In the dashboard, click <strong>Investments</strong>. Scroll past KPI cards and the "Where to see what you've earned" section to the <strong>Advisor update log</strong> card.
+            
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">4</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            The gold panel below the log is labeled <strong>✏ Log a Kevin / WF update</strong>. Fill in date, account, value, YTD earnings, YTD return, and allocation percentages.
+            
+          </td>
+        </tr>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">5</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Add any planned actions and paste Kevin's email or a summary into Notes. Click <strong>Log update</strong>. The Earned YTD card updates automatically.
+            
+          </td>
+        </tr></tbody>
+        </table>
+        <div style="background:var(--gold-lt);border:.5px solid var(--gold);border-radius:6px;padding:11px 14px;margin-top:12px;font-size:12px;color:var(--ink);line-height:1.7;">
+          <strong style="color:var(--amber);">Watch out:</strong> Log entries save to your browser only. Other team members will not see the entry unless you share the figures with them separately.
+        </div>
+        
+      </div>
+    </details>
+    <details style="border:.5px solid var(--rule);border-radius:8px;margin-bottom:10px;overflow:hidden;">
+      <summary style="padding:13px 18px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--white);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:14px;font-weight:700;color:var(--ink);">Syncing the revenue pipeline from Google Sheets</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">
+          <span style="font-size:11px;color:var(--faint);">Owner: Any staff member with internet access</span>
+          <span style="font-size:11px;color:var(--faint);">&#9660;</span>
+        </div>
+      </summary>
+      <div style="padding:0 18px 16px;border-top:.5px solid var(--rule);background:var(--white);">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0 14px;">
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">Owner</div>
+            <div style="font-size:12px;color:var(--ink);">Any staff member with internet access</div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">When</div>
+            <div style="font-size:12px;color:var(--ink);">After any update to the fundraising sheet — at minimum weekly during active fundraising</div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">What this is</div>
+            <div style="font-size:12px;color:var(--ink);">How to pull the latest pledge data from the Fundraising Revenue_Forecast_Planning sheet into the pipeline.</div>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;border:.5px solid var(--rule);border-radius:6px;overflow:hidden;">
+          <thead><tr style="background:var(--g1);">
+            <th style="width:60px;text-align:center;padding:8px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">Step</th>
+            <th style="text-align:left;padding:8px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">Item</th>
+          </tr></thead>
+          <tbody>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">1</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Confirm you have internet access. The sync requires a live connection to the Google Sheets API.
+            
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">2</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Click the <strong>Pipeline</strong> tab. Click the green <strong>"Sync from sheet"</strong> button in the Pipeline entries card.
+            
+          </td>
+        </tr>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">3</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Wait for the confirmation message (e.g. "✓ 24 pledges synced at Aug 19, 2:30 PM").
+            <br><em style="font-size:12px;color:var(--faint);">Note: A 403 error = Sheets API not enabled on the Cloud project. A "tab not found" error = tab name changed. Bring either to Josh.</em>
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">4</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Review the pipeline table. Overdue asks (past expected month, not Committed) are highlighted red — these need follow-up.
+            
+          </td>
+        </tr>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">5</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Use filters (Lead, Type, Quarter, Estimate) to focus the view.
+            
+          </td>
+        </tr></tbody>
+        </table>
+        <div style="background:var(--gold-lt);border:.5px solid var(--gold);border-radius:6px;padding:11px 14px;margin-top:12px;font-size:12px;color:var(--ink);line-height:1.7;">
+          <strong style="color:var(--amber);">Watch out:</strong> The dashboard reads the tab named "No Names_FY27 Revenue" inside the sheet "Fundraising Revenue_Forecast_Planning." If the tab is renamed, the sync will break. Do not rename the tab without updating the dashboard code.
+        </div>
+        <div style="margin-top:12px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;">Linked resources</div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:var(--g1);">
+              <th style="text-align:left;padding:7px 12px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;">Resource</th>
+              <th style="text-align:left;padding:7px 12px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;">Link / Contact</th>
+            </tr></thead>
+            <tbody><tr style="background:#f4faf9;">
+            <td style="padding:8px 12px;font-size:12px;border-bottom:.5px solid var(--rule);">Fundraising Revenue_Forecast_Planning</td>
+            <td style="padding:8px 12px;font-size:12px;border-bottom:.5px solid var(--rule);color:var(--b2);">docs.google.com/spreadsheets/d/1TTfaso7scICZqalPWnP5AlgNRAtvimGCxlYZEP7CZfk</td>
+          </tr></tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+    <details style="border:.5px solid var(--rule);border-radius:8px;margin-bottom:10px;overflow:hidden;">
+      <summary style="padding:13px 18px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--white);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:14px;font-weight:700;color:var(--ink);">Syncing the expense budget from Google Sheets</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">
+          <span style="font-size:11px;color:var(--faint);">Owner: Any staff member with internet access</span>
+          <span style="font-size:11px;color:var(--faint);">&#9660;</span>
+        </div>
+      </summary>
+      <div style="padding:0 18px 16px;border-top:.5px solid var(--rule);background:var(--white);">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0 14px;">
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">Owner</div>
+            <div style="font-size:12px;color:var(--ink);">Any staff member with internet access</div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">When</div>
+            <div style="font-size:12px;color:var(--ink);">After any update to the FY27 budget sheet — at minimum monthly</div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">What this is</div>
+            <div style="font-size:12px;color:var(--ink);">How to pull monthly expense budget totals into the Forecast tab so projections use real figures.</div>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;border:.5px solid var(--rule);border-radius:6px;overflow:hidden;">
+          <thead><tr style="background:var(--g1);">
+            <th style="width:60px;text-align:center;padding:8px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">Step</th>
+            <th style="text-align:left;padding:8px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">Item</th>
+          </tr></thead>
+          <tbody>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">1</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Confirm you have internet access. Click the <strong>Forecast</strong> tab.
+            
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">2</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            In the sync panel at the top, click the blue <strong>"Sync expenses"</strong> button.
+            
+          </td>
+        </tr>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">3</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Wait for the confirmation. The panel will show the FY27 total and the three highest-spend months.
+            
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">4</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Once synced, the forecast switches from the flat burn rate slider to real monthly budget figures. Adjust sliders to run different projections.
+            
+          </td>
+        </tr></tbody>
+        </table>
+        <div style="background:var(--gold-lt);border:.5px solid var(--gold);border-radius:6px;padding:11px 14px;margin-top:12px;font-size:12px;color:var(--ink);line-height:1.7;">
+          <strong style="color:var(--amber);">Watch out:</strong> If the expense sync is not run, the forecast uses a flat monthly average — which misses uneven spending months like October and April. Sync after any budget revision.
+        </div>
+        <div style="margin-top:12px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;">Linked resources</div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:var(--g1);">
+              <th style="text-align:left;padding:7px 12px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;">Resource</th>
+              <th style="text-align:left;padding:7px 12px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;">Link / Contact</th>
+            </tr></thead>
+            <tbody><tr style="background:#f4faf9;">
+            <td style="padding:8px 12px;font-size:12px;border-bottom:.5px solid var(--rule);">FY27 Operating Budget (For Grants) — same sheet as pipeline</td>
+            <td style="padding:8px 12px;font-size:12px;border-bottom:.5px solid var(--rule);color:var(--b2);">docs.google.com/spreadsheets/d/1TTfaso7scICZqalPWnP5AlgNRAtvimGCxlYZEP7CZfk</td>
+          </tr></tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+    <details style="border:.5px solid var(--rule);border-radius:8px;margin-bottom:10px;overflow:hidden;">
+      <summary style="padding:13px 18px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--white);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:14px;font-weight:700;color:var(--ink);">Using the Forecast tab for board or fundraising conversations</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">
+          <span style="font-size:11px;color:var(--faint);">Owner: Josh Howard or Lucas Spielfogel</span>
+          <span style="font-size:11px;color:var(--faint);">&#9660;</span>
+        </div>
+      </summary>
+      <div style="padding:0 18px 16px;border-top:.5px solid var(--rule);background:var(--white);">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0 14px;">
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">Owner</div>
+            <div style="font-size:12px;color:var(--ink);">Josh Howard or Lucas Spielfogel</div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">When</div>
+            <div style="font-size:12px;color:var(--ink);">Before board meetings, fundraising strategy sessions, or major revenue decisions</div>
+          </div>
+          <div style="background:var(--bg);border-radius:6px;padding:9px 12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:3px;">What this is</div>
+            <div style="font-size:12px;color:var(--ink);">How to model cash runway and identify fundraising urgency windows for board-level conversations.</div>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;border:.5px solid var(--rule);border-radius:6px;overflow:hidden;">
+          <thead><tr style="background:var(--g1);">
+            <th style="width:60px;text-align:center;padding:8px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">Step</th>
+            <th style="text-align:left;padding:8px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">Item</th>
+          </tr></thead>
+          <tbody>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">1</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Ensure pipeline and expense syncs have been run recently. Stale data produces misleading projections.
+            
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">2</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Click <strong>Forecast</strong>. Set <strong>"Months to model"</strong> to the horizon you want (e.g. 12 for a full fiscal year view).
+            
+          </td>
+        </tr>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">3</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Set <strong>"Revenue confidence"</strong> to reflect how certain you are pipeline gifts will close. 100% = close everything. 80% = close 80% of the pipeline.
+            
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">4</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Toggle <strong>"Use optimistic pipeline"</strong> on and off to switch scenarios. Run both for a board presentation — the range tells the story.
+            
+          </td>
+        </tr>
+        <tr style="background:#f4faf9;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">5</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            Read the <strong>"When do we need to raise?"</strong> table (bottom right). Each row is a month where projected cash drops below the 3-month buffer. These are your fundraising deadlines.
+            <br><em style="font-size:12px;color:var(--faint);">Note: A month in this table is not a crisis — it means revenue needs to close by then. Use it to drive ask timing.</em>
+          </td>
+        </tr>
+        <tr style="background:#fff;">
+          <td style="width:60px;text-align:center;font-weight:700;font-size:13px;padding:10px 8px;border-bottom:.5px solid var(--rule);color:var(--g2);">6</td>
+          <td style="padding:10px 12px;border-bottom:.5px solid var(--rule);font-size:13px;line-height:1.7;">
+            The month-by-month chart shows the full trajectory. The red dashed line = 3-month buffer floor. Months where the green line dips below red match the raise table.
+            
+          </td>
+        </tr></tbody>
+        </table>
+        <div style="background:var(--gold-lt);border:.5px solid var(--gold);border-radius:6px;padding:11px 14px;margin-top:12px;font-size:12px;color:var(--ink);line-height:1.7;">
+          <strong style="color:var(--amber);">Watch out:</strong> The Forecast tab spreads revenue evenly across the period. In reality revenue is lumpy. Use the Pipeline tab filtered by quarter for a more granular view of when money is expected.
+        </div>
+        
+      </div>
+    </details>
   </div>
 </div>
 
@@ -1106,8 +1872,22 @@ function initCharts(){
 // ── INIT ──────────────────────────────────────────────────────────────
 function safeSet(id,val,prop){prop=prop||'textContent';var el=document.getElementById(id);if(el)el[prop]=val;}
 
+function initTooltips(){
+  document.querySelectorAll('.tip-wrap').forEach(function(wrap){
+    var icon=wrap.querySelector('.tip-icon');
+    var box=wrap.querySelector('.tip-box');
+    if(!icon||!box) return;
+    icon.addEventListener('mouseenter',function(){
+      var r=icon.getBoundingClientRect();
+      box.style.left=Math.max(8,Math.min(r.left+r.width/2-130,window.innerWidth-272))+'px';
+      box.style.top=(r.top-8-box.offsetHeight||r.top-80)+'px';
+      box.style.transform='translateY(-100%)';
+    });
+  });
+}
+
 function init(){
-  load(); refreshAll(); initCharts();
+  load(); refreshAll(); initCharts(); initTooltips();
   if(S.expMonthly&&S.expMonthly.length){
     var ts=S.expFetchedAt?new Date(S.expFetchedAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
     if(ts){safeSet('sync-exp-stat','✓ Last synced '+ts);safeSet('sync-exp-stat','var(--b2)','style.color');}
