@@ -747,11 +747,78 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
   <div class="two-col" style="align-items:start;">
     <div class="card">
       <div class="card-title" style="margin-bottom:14px;">Assumptions</div>
-      <div class="srow"><label>Monthly burn rate (fallback) ($)</label><input type="range" id="fc-burn" min="150000" max="450000" step="5000" value="290000" oninput="updateFC()"><span class="sval" id="fc-burn-v">$290K</span></div>
-      <div class="srow"><label>Months to model</label><input type="range" id="fc-mo" min="1" max="18" step="1" value="6" oninput="updateFC()"><span class="sval" id="fc-mo-v">6 mo</span></div>
-      <div class="srow"><label>Revenue confidence</label><input type="range" id="fc-conf" min="60" max="110" step="5" value="100" oninput="updateFC()"><span class="sval" id="fc-conf-v">100%</span></div>
-      <div class="srow"><label>Use optimistic pipeline</label><input type="checkbox" id="fc-opt" onchange="updateFC()" style="width:auto;flex:none;"><span class="sval" id="fc-opt-v" style="color:var(--muted);font-weight:400;">Off</span></div>
-      <div style="margin-top:14px;" id="fc-bars"></div>
+
+      <!-- Start month + variance -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:5px;">Start month</label>
+          <select id="fc-start-mo" onchange="updateFC()" style="width:100%;padding:8px 10px;font-size:13px;border:.5px solid var(--rule);border-radius:6px;background:var(--white);color:var(--ink);font-family:proxima-nova,sans-serif;">
+            <option value="0">July</option>
+            <option value="1">August</option>
+            <option value="2">September</option>
+            <option value="3">October</option>
+            <option value="4">November</option>
+            <option value="5">December</option>
+            <option value="6">January</option>
+            <option value="7">February</option>
+            <option value="8">March</option>
+            <option value="9">April</option>
+            <option value="10">May</option>
+            <option value="11">June</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:5px;">Months to model</label>
+          <select id="fc-mo" onchange="updateFC()" style="width:100%;padding:8px 10px;font-size:13px;border:.5px solid var(--rule);border-radius:6px;background:var(--white);color:var(--ink);font-family:proxima-nova,sans-serif;">
+            <option value="1">1 month</option>
+            <option value="2">2 months</option>
+            <option value="3">3 months</option>
+            <option value="4">4 months</option>
+            <option value="5">5 months</option>
+            <option value="6" selected>6 months</option>
+            <option value="7">7 months</option>
+            <option value="8">8 months</option>
+            <option value="9">9 months</option>
+            <option value="10">10 months</option>
+            <option value="11">11 months</option>
+            <option value="12">12 months</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Variance buffer -->
+      <div class="srow" style="margin-bottom:4px;">
+        <label>Budget variance buffer</label>
+        <input type="range" id="fc-variance" min="0" max="15" step="1" value="2" oninput="updateFC()">
+        <span class="sval" id="fc-variance-v">+2%</span>
+      </div>
+      <p style="font-size:11px;color:var(--faint);margin-bottom:12px;">Applied to each month's budgeted expense as a conservative buffer. Default 2%.</p>
+
+      <!-- Revenue confidence + pipeline -->
+      <div class="srow">
+        <label>Revenue confidence</label>
+        <input type="range" id="fc-conf" min="60" max="110" step="5" value="100" oninput="updateFC()">
+        <span class="sval" id="fc-conf-v">100%</span>
+      </div>
+      <div class="srow" style="margin-bottom:14px;">
+        <label>Use optimistic pipeline</label>
+        <input type="checkbox" id="fc-opt" onchange="updateFC()" style="width:auto;flex:none;">
+        <span class="sval" id="fc-opt-v" style="color:var(--muted);font-weight:400;">Off</span>
+      </div>
+
+      <input type="hidden" id="fc-burn" value="290000"><span id="fc-mo-v" style="display:none"></span>
+      <!-- Monthly expense breakdown (from sheet or seed data) -->
+      <div id="fc-month-grid" style="margin-bottom:14px;"></div>
+
+      <!-- Manual fallback -->
+      <details style="margin-bottom:14px;">
+        <summary style="font-size:12px;color:var(--muted);cursor:pointer;padding:6px 0;">Override monthly expenses manually</summary>
+        <div style="margin-top:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="fc-manual-grid"></div>
+        <button onclick="applyManualExpenses()" style="margin-top:10px;padding:6px 14px;background:var(--g2);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;">Apply overrides</button>
+        <button onclick="clearManualExpenses()" style="margin-top:10px;margin-left:8px;padding:6px 14px;background:none;border:.5px solid var(--rule);color:var(--muted);border-radius:6px;font-size:12px;cursor:pointer;font-family:proxima-nova,sans-serif;">Clear overrides</button>
+      </details>
+
+      <div style="margin-top:4px;" id="fc-bars"></div>
       <div class="verdict" id="fc-warn"></div>
       <div id="exp-tbl" style="margin-top:10px;overflow-x:auto;"></div>
     </div>
@@ -1545,7 +1612,7 @@ let role=null, fcChart=null, pipF={lead:'all',type:'all',quarter:'all'};
 let S={
   chase:834117,debt:67078,chaseDate:'',
   mm1:537731,mm2:1312012,endowment:1322973,eai:103627,invDate:'',
-  expMonthly:null,expFetchedAt:null,
+  expMonthly:[232893,254792,266483,332585,255230,234672,236984,266711,245901,314456,228487,187168],expFetchedAt:'seed',expManual:[null,null,null,null,null,null,null,null,null,null,null,null],
   pipelineFetchedAt:null,
   wfLog:[{dt:'2026-08-01',acct:'endowment',val:1426000,ytdD:108000,ytdP:9.43,stocks:62,bonds:20,alts:18,cashMv:100000,plan:'Investing last $100K Sept 7th',notes:'Averaged $400K into managed account over 4 months. $200K already invested, $100K added today. Account lost $2K since June 5th board report.'}],
   pledges:[
@@ -1755,39 +1822,155 @@ function renderPipeline(){
 }
 
 // ── FORECAST ──────────────────────────────────────────────────────────
+function getStartMoIdx(){
+  var sel=document.getElementById('fc-start-mo');
+  return sel?parseInt(sel.value):((new Date().getMonth()-6+12)%12);
+}
+
+function getVariance(){
+  var el=document.getElementById('fc-variance');
+  return el?1+(parseInt(el.value)/100):1.02;
+}
+
+function getEffectiveExpenses(){
+  // Returns array of 12 monthly expenses with variance applied and manual overrides respected
+  var base=S.expMonthly&&S.expMonthly.length===12?S.expMonthly:
+    [232893,254792,266483,332585,255230,234672,236984,266711,245901,314456,228487,187168];
+  var variance=getVariance();
+  var manual=S.expManual||[null,null,null,null,null,null,null,null,null,null,null,null];
+  return base.map(function(v,i){ return manual[i]!=null?manual[i]:Math.round(v*variance); });
+}
+
+function renderMonthGrid(startIdx, numMonths, expenses){
+  var grid=document.getElementById('fc-month-grid'); if(!grid)return;
+  var isFromSheet=S.expFetchedAt&&S.expFetchedAt!=='seed';
+  var sourceLabel=isFromSheet?'From budget sheet + '+Math.round((getVariance()-1)*100)+'% buffer':'From FY27 budget (seed data) + '+Math.round((getVariance()-1)*100)+'% buffer';
+  var rows='';
+  for(var i=0;i<numMonths;i++){
+    var fi=(startIdx+i)%12;
+    var manual=S.expManual&&S.expManual[fi]!=null;
+    rows+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:.5px solid var(--rule);font-size:12px;">'
+      +'<span style="color:var(--muted);">'+FY_MOS[fi]+'</span>'
+      +'<span style="font-weight:600;color:'+(manual?'var(--gold)':'var(--ink)')+';">'+fmt(expenses[fi])+(manual?' ✎':'')+'</span>'
+      +'</div>';
+  }
+  grid.innerHTML='<div style="background:var(--bg);border-radius:6px;padding:10px 12px;">'
+    +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:8px;">'+sourceLabel+'</div>'
+    +rows
+    +'</div>';
+}
+
+function buildManualGrid(){
+  var grid=document.getElementById('fc-manual-grid'); if(!grid)return;
+  var expenses=getEffectiveExpenses();
+  var manual=S.expManual||[null,null,null,null,null,null,null,null,null,null,null,null];
+  grid.innerHTML=FY_MOS.map(function(mo,i){
+    return '<div><label style="font-size:10px;color:var(--faint);display:block;margin-bottom:3px;">'+mo+'</label>'
+      +'<input type="number" id="man-'+i+'" value="'+(manual[i]!=null?manual[i]:Math.round(expenses[i]))+'" '
+      +'style="width:100%;padding:5px 7px;font-size:12px;border:.5px solid var(--rule);border-radius:4px;font-family:proxima-nova,sans-serif;"></div>';
+  }).join('');
+}
+
+function applyManualExpenses(){
+  if(!S.expManual) S.expManual=[null,null,null,null,null,null,null,null,null,null,null,null];
+  FY_MOS.forEach(function(_,i){
+    var el=document.getElementById('man-'+i);
+    if(el&&el.value) S.expManual[i]=+el.value||null;
+  });
+  save(); updateFC();
+}
+
+function clearManualExpenses(){
+  S.expManual=[null,null,null,null,null,null,null,null,null,null,null,null];
+  save(); buildManualGrid(); updateFC();
+}
+
+// Set start month dropdown to current FY month on load
+function initFCStartMonth(){
+  var sel=document.getElementById('fc-start-mo');
+  if(!sel)return;
+  var fyNow=(new Date().getMonth()-6+12)%12;
+  sel.value=String(fyNow);
+}
+
 function updateFC(){
-  const burn=+document.getElementById('fc-burn').value, mo=+document.getElementById('fc-mo').value, conf=+document.getElementById('fc-conf').value/100, useOpt=document.getElementById('fc-opt').checked;
-  document.getElementById('fc-burn-v').textContent=fmt(burn);
-  document.getElementById('fc-mo-v').textContent=mo+' mo';
-  document.getElementById('fc-conf-v').textContent=Math.round(conf*100)+'%';
-  document.getElementById('fc-opt-v').textContent=useOpt?'On — optimistic':'Off — conservative';
-  const hasExp=S.expMonthly&&S.expMonthly.length===12;
-  if(hasExp){fcWithBudget(mo,conf,useOpt,burn);return;}
-  const pipe=(useOpt?S.pledges.reduce((a,p)=>a+p.opt,0):S.pledges.reduce((a,p)=>a+p.con,0))*conf;
-  const tExp=burn*mo, net=S.chase+pipe-tExp-S.debt, max=Math.max(S.chase+pipe,tExp+S.debt);
-  const bars=[{l:'Starting cash',v:S.chase,c:'#006b56'},{l:`+ Pipeline (${useOpt?'opt':'conserv'}, ${Math.round(conf*100)}% conf)`,v:pipe,c:'#4da08f'},{l:`− Expenses (${mo} mo)`,v:tExp,c:'#BF9000',neg:true},{l:'− Debt',v:S.debt,c:'#F09595',neg:true}];
-  document.getElementById('fc-bars').innerHTML=bars.map(b=>`<div class="brow"><span class="bl">${b.l}</span><div class="btrack"><div class="bfill" style="background:${b.c};width:${Math.min(100,b.v/max*100)}%"></div></div><span class="bv ${b.neg?'neg':''}">${b.neg?'(':''}${fmt(b.v)}${b.neg?')':''}</span></div>`).join('')+`<div class="brow bdiv" style="font-weight:600"><span class="bl">Projected end cash</span><div class="btrack"><div class="bfill" style="background:${net>=0?'#006b56':'#8B1A1A'};width:${Math.max(2,Math.abs(net)/max*100)}%"></div></div><span class="bv ${net<0?'neg':''}">${fmtF(net)}</span></div>`;
-  renderFCWarn(net,burn,mo);
-  renderFCChart(mo,burn,pipe);
-  renderFCRaise(mo,burn,pipe);
+  var startIdx=getStartMoIdx();
+  var mo=parseInt(document.getElementById('fc-mo').value)||6;
+  var conf=parseInt(document.getElementById('fc-conf').value)/100;
+  var useOpt=document.getElementById('fc-opt').checked;
+  var variance=getVariance();
+
+  // Update display values
+  var fcMoEl=document.getElementById('fc-mo-v');
+  if(fcMoEl) fcMoEl.textContent=mo+' mo';
+  var confEl=document.getElementById('fc-conf-v');
+  if(confEl) confEl.textContent=Math.round(conf*100)+'%';
+  var optEl=document.getElementById('fc-opt-v');
+  if(optEl) optEl.textContent=useOpt?'On — optimistic':'Off — conservative';
+  var varEl=document.getElementById('fc-variance-v');
+  if(varEl) varEl.textContent='+'+Math.round((variance-1)*100)+'%';
+
+  var expenses=getEffectiveExpenses();
+  renderMonthGrid(startIdx,mo,expenses);
+  buildManualGrid();
+
+  var pipe=(useOpt?S.pledges.reduce(function(a,p){return a+p.opt;},0):S.pledges.reduce(function(a,p){return a+p.con;},0))*conf;
+
+  // Calculate total expenses for selected window
+  var tExp=0; var monthExp=[];
+  for(var i=0;i<mo;i++){
+    var fi=(startIdx+i)%12;
+    tExp+=expenses[fi];
+    monthExp.push({e:expenses[fi],fi:fi});
+  }
+
+  var burnFallback=+document.getElementById('fc-burn').value||290000;
+  var net=S.chase+pipe-tExp-S.debt;
+  var max=Math.max(S.chase+pipe,tExp+S.debt,1);
+
+  // Bars
+  var bars=[
+    {l:'Starting cash',v:S.chase,c:'#006b56'},
+    {l:'+ Pipeline ('+(useOpt?'opt':'conserv')+', '+Math.round(conf*100)+'% conf)',v:pipe,c:'#4da08f'},
+    {l:'− Expenses ('+mo+' mo, budgeted +'+Math.round((variance-1)*100)+'%)',v:tExp,c:'#BF9000',neg:true},
+    {l:'− Debt + credit cards',v:S.debt,c:'#F09595',neg:true},
+  ];
+  var barsEl=document.getElementById('fc-bars');
+  if(barsEl) barsEl.innerHTML=bars.map(function(b){
+    return '<div class="brow"><span class="bl">'+b.l+'</span>'
+      +'<div class="btrack"><div class="bfill" style="background:'+b.c+';width:'+Math.min(100,b.v/max*100)+'%"></div></div>'
+      +'<span class="bv '+(b.neg?'neg':'')+'">'+( b.neg?'(':'')+fmt(b.v)+(b.neg?')':'')+'</span></div>';
+  }).join('')+'<div class="brow bdiv" style="font-weight:600">'
+    +'<span class="bl">Projected end cash</span>'
+    +'<div class="btrack"><div class="bfill" style="background:'+(net>=0?'#006b56':'#8B1A1A')+';width:'+Math.max(2,Math.abs(net)/max*100)+'%"></div></div>'
+    +'<span class="bv '+(net<0?'neg':'')+'">'+fmtF(net)+'</span></div>';
+
+  renderFCWarn(net,burnFallback,mo);
+
+  // Chart
+  var labels=[],cashLine=[],mRev=pipe/mo,run=S.chase;
+  monthExp.forEach(function(m){
+    run=run+mRev-m.e;
+    labels.push(FY_MOS[m.fi].slice(0,3));
+    cashLine.push(Math.round(run));
+  });
+  renderFCChartData(labels,cashLine,burnFallback);
+
+  // Raise table
+  var raise=[]; run=S.chase;
+  monthExp.forEach(function(m){
+    run=run+mRev-m.e;
+    if(run<burnFallback*3) raise.push({mo:FY_MOS[m.fi],cash:run,gap:burnFallback*3-run,exp:m.e});
+  });
+  var raiseEl=document.getElementById('fc-raise');
+  if(raiseEl) raiseEl.innerHTML=raise.length===0
+    ?'<p style="color:var(--g2);font-size:13px;">&#10003; No critical raise windows in this period at current assumptions.</p>'
+    :'<table class="tbl"><thead><tr><th>Month</th><th class="r">Budgeted (+'+Math.round((variance-1)*100)+'%)</th><th class="r">Projected cash</th><th class="r">Gap to 3-mo buffer</th></tr></thead><tbody>'
+      +raise.map(function(r){return '<tr><td>'+r.mo+'</td><td class="r">'+fmtF(r.exp)+'</td><td class="r neg">'+fmtF(r.cash)+'</td><td class="r neg">'+fmtF(r.gap)+'</td></tr>';}).join('')
+      +'</tbody></table>';
 }
-function fcWithBudget(mo,conf,useOpt,burn){
-  const monthly=S.expMonthly;
-  const pipe=(useOpt?S.pledges.reduce((a,p)=>a+p.opt,0):S.pledges.reduce((a,p)=>a+p.con,0))*conf;
-  const jsM=new Date().getMonth(); const fyNow=(jsM-6+12)%12;
-  let tExp=0; const monthExp=[];
-  for(let i=0;i<mo;i++){const fi=(fyNow+i)%12; const e=monthly[fi]||burn; monthExp.push({e,fi}); tExp+=e;}
-  const net=S.chase+pipe-tExp-S.debt, max=Math.max(S.chase+pipe,tExp+S.debt);
-  const bars=[{l:'Starting cash',v:S.chase,c:'#006b56'},{l:`+ Pipeline (${useOpt?'opt':'conserv'}, ${Math.round(conf*100)}% conf)`,v:pipe,c:'#4da08f'},{l:`− Expenses (${mo} mo, budget)`,v:tExp,c:'#BF9000',neg:true},{l:'− Debt',v:S.debt,c:'#F09595',neg:true}];
-  document.getElementById('fc-bars').innerHTML=bars.map(b=>`<div class="brow"><span class="bl">${b.l}</span><div class="btrack"><div class="bfill" style="background:${b.c};width:${Math.min(100,b.v/max*100)}%"></div></div><span class="bv ${b.neg?'neg':''}">${b.neg?'(':''}${fmt(b.v)}${b.neg?')':''}</span></div>`).join('')+`<div class="brow bdiv" style="font-weight:600"><span class="bl">Projected end cash</span><div class="btrack"><div class="bfill" style="background:${net>=0?'#006b56':'#8B1A1A'};width:${Math.max(2,Math.abs(net)/max*100)}%"></div></div><span class="bv ${net<0?'neg':''}">${fmtF(net)}</span></div>`;
-  renderFCWarn(net,burn,mo);
-  const labels=[], cashLine=[], mRev=pipe/mo; let run=S.chase;
-  monthExp.forEach(({e,fi})=>{run=run+mRev-e; labels.push(FY_MOS[fi].slice(0,3)); cashLine.push(Math.round(run));});
-  renderFCChartData(labels,cashLine,burn);
-  const raise=[]; run=S.chase;
-  monthExp.forEach(({e,fi})=>{run=run+mRev-e; if(run<burn*3) raise.push({mo:FY_MOS[fi],cash:run,gap:burn*3-run,exp:e});});
-  document.getElementById('fc-raise').innerHTML=raise.length===0?'<p style="color:var(--g2);font-size:13px;">✓ No critical raise windows at current assumptions.</p>':'<table class="tbl"><thead><tr><th>Month</th><th class="r">Budgeted</th><th class="r">Projected cash</th><th class="r">Gap to 3-mo buffer</th></tr></thead><tbody>'+raise.map(r=>`<tr><td>${r.mo}</td><td class="r">${fmtF(r.exp)}</td><td class="r neg">${fmtF(r.cash)}</td><td class="r neg">${fmtF(r.gap)}</td></tr>`).join('')+'</tbody></table>';
-}
+
+
 function renderFCWarn(net,burn,mo){
   const w=document.getElementById('fc-warn');
   if(net<0){w.style.cssText='background:#FCEBEB;color:#8B1A1A';w.textContent=`Projected shortfall of ${fmt(Math.abs(net))} over ${mo} months.`;}
@@ -1887,7 +2070,7 @@ function initTooltips(){
 }
 
 function init(){
-  load(); refreshAll(); initCharts(); initTooltips();
+  load(); refreshAll(); initCharts(); initTooltips(); initFCStartMonth();
   if(S.expMonthly&&S.expMonthly.length){
     var ts=S.expFetchedAt?new Date(S.expFetchedAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
     if(ts){safeSet('sync-exp-stat','✓ Last synced '+ts);safeSet('sync-exp-stat','var(--b2)','style.color');}
