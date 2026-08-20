@@ -672,65 +672,84 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
 
   <div class="two-col" style="align-items:start;">
     <div class="card">
-      <!-- Simple/Advanced toggle -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <!-- Toggle -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
         <div class="card-title">Forecast</div>
         <div style="display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:20px;padding:3px;">
-          <button id="fc-simple-btn" onclick="setFCMode('simple')" style="padding:4px 14px;border-radius:16px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;background:var(--g2);color:#fff;transition:all .15s;">Simple</button>
-          <button id="fc-adv-btn" onclick="setFCMode('advanced')" style="padding:4px 14px;border-radius:16px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;background:none;color:var(--muted);transition:all .15s;">Advanced</button>
+          <button id="fc-simple-btn" onclick="setFCMode('simple')" style="padding:4px 14px;border-radius:16px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;background:none;color:var(--muted);">Simple</button>
+          <button id="fc-adv-btn" onclick="setFCMode('advanced')" style="padding:4px 14px;border-radius:16px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;background:var(--g2);color:#fff;">Advanced</button>
         </div>
       </div>
 
-      <!-- SIMPLE MODE -->
-      <div id="fc-simple">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-          <div>
-            <label style="font-size:11px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:5px;">Starting from</label>
-            <select id="fc-start-mo" onchange="updateFC()" style="width:100%;padding:8px 10px;font-size:13px;border:.5px solid var(--rule);border-radius:6px;background:var(--white);color:var(--ink);font-family:proxima-nova,sans-serif;">
-              <option value="0">July</option><option value="1">August</option><option value="2">September</option>
-              <option value="3">October</option><option value="4">November</option><option value="5">December</option>
-              <option value="6">January</option><option value="7">February</option><option value="8">March</option>
-              <option value="9">April</option><option value="10">May</option><option value="11">June</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:5px;">Looking ahead</label>
-            <select id="fc-mo" onchange="updateFC()" style="width:100%;padding:8px 10px;font-size:13px;border:.5px solid var(--rule);border-radius:6px;background:var(--white);color:var(--ink);font-family:proxima-nova,sans-serif;">
-              <option value="1">1 month</option><option value="2">2 months</option><option value="3">3 months</option>
-              <option value="4">4 months</option><option value="5">5 months</option><option value="6" selected>6 months</option>
-              <option value="7">7 months</option><option value="8">8 months</option><option value="9">9 months</option>
-              <option value="10">10 months</option><option value="11">11 months</option><option value="12">12 months</option>
-            </select>
-          </div>
+      <!-- Shared: two dropdowns always visible -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:5px;">Starting from</label>
+          <select id="fc-start-mo" onchange="updateFC()" style="width:100%;padding:8px 10px;font-size:13px;border:.5px solid var(--rule);border-radius:6px;background:var(--white);color:var(--ink);font-family:proxima-nova,sans-serif;">
+            <option value="0">July</option><option value="1">August</option><option value="2">September</option>
+            <option value="3">October</option><option value="4">November</option><option value="5">December</option>
+            <option value="6">January</option><option value="7">February</option><option value="8">March</option>
+            <option value="9">April</option><option value="10">May</option><option value="11">June</option>
+          </select>
         </div>
-        <!-- Visual pipeline summary — simple mode -->
-        <div id="fc-pipe-breakdown" style="margin-bottom:12px;"></div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:5px;">Looking ahead</label>
+          <select id="fc-mo" onchange="updateFC()" style="width:100%;padding:8px 10px;font-size:13px;border:.5px solid var(--rule);border-radius:6px;background:var(--white);color:var(--ink);font-family:proxima-nova,sans-serif;">
+            <option value="1">1 month</option><option value="2">2 months</option><option value="3">3 months</option>
+            <option value="4">4 months</option><option value="5">5 months</option><option value="6" selected>6 months</option>
+            <option value="7">7 months</option><option value="8">8 months</option><option value="9">9 months</option>
+            <option value="10">10 months</option><option value="11">11 months</option><option value="12">12 months</option>
+          </select>
+        </div>
       </div>
 
-      <!-- ADVANCED MODE (hidden by default) -->
-      <div id="fc-advanced" style="display:none;">
+      <!-- SIMPLE MODE: two levers + verdict -->
+      <div id="fc-simple" style="display:none;">
+        <div class="srow" style="margin-bottom:4px;">
+          <label style="display:flex;align-items:center;gap:6px;">What % of pipeline will close?
+            <div class="tip-wrap"><span class="tip-icon" style="background:rgba(0,0,0,.1);color:var(--muted);border:1px solid var(--rule);">?</span>
+              <div class="tip-box">Slide left if you think some gifts won't come through. 100% = counting on everything. 80% = expect to lose 20% of expected gifts. Committed gifts always count in full.</div>
+            </div>
+          </label>
+          <input type="range" id="fc-conf-s" min="60" max="110" step="5" value="100" oninput="syncSimpleSliders()">
+          <span class="sval" id="fc-conf-s-v">100%</span>
+        </div>
+        <div class="srow" style="margin-bottom:16px;">
+          <label style="display:flex;align-items:center;gap:6px;">Add expense cushion
+            <div class="tip-wrap"><span class="tip-icon" style="background:rgba(0,0,0,.1);color:var(--muted);border:1px solid var(--rule);">?</span>
+              <div class="tip-box">Adds a small % buffer on top of each month's budgeted expenses in case spending runs over. 2% is a reasonable default.</div>
+            </div>
+          </label>
+          <input type="range" id="fc-variance-s" min="0" max="15" step="1" value="2" oninput="syncSimpleSliders()">
+          <span class="sval" id="fc-variance-s-v">+2%</span>
+        </div>
+        <div id="fc-simple-verdict" style="border-radius:10px;padding:20px 22px;margin-bottom:4px;"></div>
+      </div>
+
+      <!-- ADVANCED MODE -->
+      <div id="fc-advanced">
         <div class="srow" style="margin-bottom:4px;">
           <label style="display:flex;align-items:center;gap:6px;">Expense cushion
             <div class="tip-wrap"><span class="tip-icon" style="background:rgba(0,0,0,.1);color:var(--muted);border:1px solid var(--rule);">?</span>
-              <div class="tip-box">Adds a small % on top of each month's budgeted expense in case spending runs over. 2% is a reasonable default. Increase if you want to be more conservative.</div>
+              <div class="tip-box">Adds a small % on top of each month's budgeted expense in case spending runs over. 2% is a reasonable default.</div>
             </div>
           </label>
-          <input type="range" id="fc-variance" min="0" max="15" step="1" value="2" oninput="updateFC()">
+          <input type="range" id="fc-variance" min="0" max="15" step="1" value="2" oninput="var s=document.getElementById('fc-variance-s');if(s)s.value=this.value;safeSet('fc-variance-s-v','+'+this.value+'%');updateFC();">
           <span class="sval" id="fc-variance-v">+2%</span>
         </div>
         <div class="srow" style="margin-bottom:4px;">
           <label style="display:flex;align-items:center;gap:6px;">Pipeline confidence
             <div class="tip-wrap"><span class="tip-icon" style="background:rgba(0,0,0,.1);color:var(--muted);border:1px solid var(--rule);">?</span>
-              <div class="tip-box">What % of your expected gifts do you think will actually close? 100% = you're counting on all of them. 80% = you expect to lose 20%. Committed gifts are always counted in full regardless of this setting.</div>
+              <div class="tip-box">What % of your expected gifts will actually close? 100% = counting on all of them. 80% = expect to lose 20%. Committed gifts always count in full.</div>
             </div>
           </label>
-          <input type="range" id="fc-conf" min="60" max="110" step="5" value="100" oninput="updateFC()">
+          <input type="range" id="fc-conf" min="60" max="110" step="5" value="100" oninput="var s=document.getElementById('fc-conf-s');if(s)s.value=this.value;safeSet('fc-conf-s-v',this.value+'%');updateFC();">
           <span class="sval" id="fc-conf-v">100%</span>
         </div>
         <div class="srow" style="margin-bottom:4px;">
           <label style="display:flex;align-items:center;gap:6px;">Use best-case amounts
             <div class="tip-wrap"><span class="tip-icon" style="background:rgba(0,0,0,.1);color:var(--muted);border:1px solid var(--rule);">?</span>
-              <div class="tip-box">Each gift in the pipeline has a conservative and optimistic estimate. Toggle on to use the higher number for each gift. Useful for seeing the upside scenario.</div>
+              <div class="tip-box">Each gift has a conservative and optimistic estimate. Toggle on to use the higher number. Good for upside scenario planning.</div>
             </div>
           </label>
           <input type="checkbox" id="fc-opt" onchange="updateFC()" style="width:auto;flex:none;">
@@ -739,12 +758,13 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
         <div class="srow" style="margin-bottom:14px;">
           <label style="display:flex;align-items:center;gap:6px;">Count late gifts
             <div class="tip-wrap"><span class="tip-icon" style="background:rgba(0,0,0,.1);color:var(--muted);border:1px solid var(--rule);">?</span>
-              <div class="tip-box">Some gifts in your pipeline were expected before your start month but haven't arrived yet. Toggle ON to include them at half your normal confidence (since they're late, we count them more conservatively). Toggle OFF to exclude them entirely.</div>
+              <div class="tip-box">Gifts expected before your start month that haven't arrived yet. ON = include at half confidence. OFF = exclude entirely for a more conservative view.</div>
             </div>
           </label>
           <input type="checkbox" id="fc-atrisk" onchange="updateFC()" style="width:auto;flex:none;" checked>
           <span class="sval" id="fc-atrisk-v" style="color:var(--muted);font-weight:400;">Included</span>
         </div>
+        <div id="fc-pipe-breakdown" style="margin-bottom:12px;"></div>
         <details style="margin-bottom:14px;border:.5px solid var(--rule);border-radius:6px;">
           <summary style="padding:8px 12px;font-size:12px;color:var(--muted);cursor:pointer;list-style:none;">Override monthly expenses manually</summary>
           <div style="padding:10px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="fc-manual-grid"></div>
@@ -754,13 +774,13 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
           </div>
         </details>
         <div id="fc-month-grid" style="margin-bottom:10px;"></div>
+        <div id="fc-bars" style="margin-top:4px;"></div>
+        <div class="verdict" id="fc-warn"></div>
       </div>
 
-      <!-- Shared (both modes) -->
+      <!-- Hidden inputs always present -->
       <input type="hidden" id="fc-burn" value="290000">
       <span id="fc-mo-v" style="display:none"></span>
-      <div id="fc-bars" style="margin-top:4px;"></div>
-      <div class="verdict" id="fc-warn"></div>
       <div id="exp-tbl" style="margin-top:10px;overflow-x:auto;"></div>
     </div>
     <div>
@@ -1183,15 +1203,28 @@ function applyManualExpenses(){
   save();updateFC();
 }
 function clearManualExpenses(){S.expManual=[null,null,null,null,null,null,null,null,null,null,null,null];save();buildManualGrid();updateFC();}
-function setFCMode(mode){
-  document.getElementById('fc-simple').style.display = mode==='simple'?'block':'none';
-  document.getElementById('fc-advanced').style.display = mode==='advanced'?'block':'none';
-  document.getElementById('fc-simple-btn').style.cssText = mode==='simple'?'padding:4px 14px;border-radius:16px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;background:var(--g2);color:#fff;':'padding:4px 14px;border-radius:16px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;background:none;color:var(--muted);';
-  document.getElementById('fc-adv-btn').style.cssText = mode==='advanced'?'padding:4px 14px;border-radius:16px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;background:var(--g2);color:#fff;':'padding:4px 14px;border-radius:16px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;background:none;color:var(--muted);';
+function syncSimpleSliders(){
+  // Mirror simple sliders to the advanced controls so updateFC() reads correct values
+  var cs=document.getElementById('fc-conf-s'),ca=document.getElementById('fc-conf');
+  var vs=document.getElementById('fc-variance-s'),va=document.getElementById('fc-variance');
+  if(cs&&ca){ca.value=cs.value;safeSet('fc-conf-v',cs.value+'%');safeSet('fc-conf-s-v',cs.value+'%');}
+  if(vs&&va){va.value=vs.value;safeSet('fc-variance-v','+'+vs.value+'%');safeSet('fc-variance-s-v','+'+vs.value+'%');}
   updateFC();
 }
 
-function initFCStartMonth(){var sel=document.getElementById('fc-start-mo');if(!sel)return;sel.value=String((new Date().getMonth()-6+12)%12);}
+function setFCMode(mode){
+  var isAdv=mode==='advanced';
+  document.getElementById('fc-simple').style.display=isAdv?'none':'block';
+  document.getElementById('fc-advanced').style.display=isAdv?'block':'none';
+  var sBtn=document.getElementById('fc-simple-btn'),aBtn=document.getElementById('fc-adv-btn');
+  var onStyle='padding:4px 14px;border-radius:16px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;background:var(--g2);color:#fff;';
+  var offStyle='padding:4px 14px;border-radius:16px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;background:none;color:var(--muted);';
+  if(sBtn) sBtn.style.cssText=isAdv?offStyle:onStyle;
+  if(aBtn) aBtn.style.cssText=isAdv?onStyle:offStyle;
+  updateFC();
+}
+
+function initFCStartMonth(){var sel=document.getElementById('fc-start-mo');if(!sel)return;sel.value=String((new Date().getMonth()-6+12)%12);setFCMode('advanced');}
 
 function updateFC(){
   var startIdx=getStartMoIdx();
@@ -1254,10 +1287,10 @@ function updateFC(){
       // At-risk
       +(pipeAtRisk>0?
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px;border-bottom:.5px solid var(--rule);background:'+(includeAtRisk?'var(--gold-lt)':'var(--red-lt)')+';margin:0 -14px;padding-left:14px;padding-right:14px;">'
-          +'<div><div style="font-size:12px;font-weight:600;color:'+(includeAtRisk?'var(--amber)':'var(--red)')+';">'+(includeAtRisk?'\u26a0':'&#10005;')+' Overdue asks \u2014 '+(includeAtRisk?'included at reduced confidence':'excluded')+'</div>'
+          +'<div><div style="font-size:12px;font-weight:600;color:'+(includeAtRisk?'#c45c00':'var(--red)')+';">'+(includeAtRisk?'\u26a0':'&#10005;')+' Overdue asks \u2014 '+(includeAtRisk?'included at reduced confidence':'excluded')+'</div>'
           +'<div style="font-size:11px;color:var(--muted);margin-top:2px;">These gifts were expected <em>before</em> '+startMoName+' but haven\'t arrived yet. They may still come in, but they\'re late. '+(includeAtRisk?'Counted at <strong>'+halfPct+'%</strong> (half your normal confidence).':'Toggle "Include overdue asks" on to count them at reduced confidence.')+'</div>'
           +'<div style="font-size:11px;color:var(--faint);margin-top:2px;">'+atRiskPledges.length+' pledge'+(atRiskPledges.length!==1?'s':'')+' \u00b7 '+fmtF(pipeAtRisk)+' total \u2192 '+(includeAtRisk?halfPct+'% = '+fmtF(Math.round(pipeAtRisk*conf*0.5)):'not counted')+'</div></div>'
-          +'<span style="font-size:14px;font-weight:700;color:'+(includeAtRisk?'var(--amber)':'var(--red)')+';white-space:nowrap;margin-left:16px;">'+(includeAtRisk?fmtF(Math.round(pipeAtRisk*conf*0.5)):'\u2014')+'</span>'
+          +'<span style="font-size:14px;font-weight:700;color:'+(includeAtRisk?'#c45c00':'var(--red)')+';white-space:nowrap;margin-left:16px;">'+(includeAtRisk?fmtF(Math.round(pipeAtRisk*conf*0.5)):'\u2014')+'</span>'
         +'</div>'
         +(atRiskPledges.length?
           '<details style="margin:4px 0 0;"><summary style="font-size:11px;color:var(--faint);cursor:pointer;padding:5px 0;list-style:none;">\u25be Show overdue pledges ('+atRiskPledges.length+')</summary>'
@@ -1312,6 +1345,34 @@ function updateFC(){
     :'<table class="tbl"><thead><tr><th>Month</th><th class="r">Budgeted (+'+Math.round((variance-1)*100)+'%)</th><th class="r">Projected cash</th><th class="r">Gap to 3-mo buffer</th></tr></thead><tbody>'
       +raise.map(function(r){return'<tr><td>'+r.mo+'</td><td class="r">'+fmtF(r.exp)+'</td><td class="r neg">'+fmtF(r.cash)+'</td><td class="r neg">'+fmtF(r.gap)+'</td></tr>';}).join('')
       +'</tbody></table>';
+
+  // ── Simple mode verdict ───────────────────────────────────────────
+  var sv=document.getElementById('fc-simple-verdict');
+  if(sv){
+    var mosCovered=Math.round((S.chase+pipe)/burnFallback*10)/10;
+    var nextPressure=raise.length?raise[0].mo:null;
+    var color,emoji,headline,sub;
+    if(raise.length===0){
+      color='var(--g2)';emoji='\u2713';
+      headline='Looking good for '+startMoName+'\u2013'+endMoName+'.';
+      sub='Projected cash stays above the 3-month buffer the entire period.';
+    } else if(raise[0]===monthExp[0]){
+      color='var(--red)';emoji='\u26a0';
+      headline='Cash gets tight immediately.';
+      sub='Cash is below the 3-month buffer starting in '+nextPressure+'. Revenue needs to close now.';
+    } else {
+      color='var(--gold)';emoji='\u25b6';
+      headline='Watch '+nextPressure+'.';
+      sub='Cash is fine until '+nextPressure+', then drops below the 3-month buffer. That is your fundraising deadline.';
+    }
+    var bgMap={'var(--g2)':'#d3eba7','var(--red)':'#FCEBEB','var(--gold)':'#FEF6DC'};
+    sv.style.background=bgMap[color]||'#f5f5f5';
+    sv.style.borderLeft='4px solid '+color;
+    sv.innerHTML='<div style="font-size:28px;margin-bottom:8px;">'+emoji+'</div>'
+      +'<div style="font-size:17px;font-weight:700;color:'+color+';margin-bottom:6px;">'+headline+'</div>'
+      +'<div style="font-size:13px;color:var(--muted);line-height:1.7;">'+sub+'</div>'
+      +(nextPressure?'<div style="margin-top:12px;font-size:12px;color:var(--muted);">Starting from: <strong>'+startMoName+'</strong> &nbsp;|&nbsp; Looking ahead: <strong>'+mo+' months</strong> &nbsp;|&nbsp; Pipeline counted: <strong>'+fmtF(Math.round(pipe))+'</strong></div>':'');
+  }
 }
 
 function renderFCWarn(net,burn,mo){
