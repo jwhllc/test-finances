@@ -290,7 +290,7 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
         <div class="tip-wrap"><span class="tip-icon">?</span><div class="tip-box">Your operating checking account at Chase. This is immediately spendable — no action required.</div></div>
       </div>
       <div class="bal-value" id="d-chase">—</div>
-      <div class="bal-sub" id="d-chase-dt"></div><div class="bal-note">Last entered — not live. Update on Cash position tab.</div>
+      <div class="bal-sub" id="d-chase-dt"></div><div class="bal-note">Chase minus debt — not live. Update on Cash position tab.</div>
     </div>
     <div class="bal-card green">
       <div class="bal-label">Liquid reserves
@@ -313,7 +313,7 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
     <div class="total-card liq">
       <div>
         <div class="total-label">Total liquid cash</div>
-        <div class="total-note">Chase + MM reserves, minus debt</div>
+        <div class="total-note">Net Chase + MM reserves</div>
       </div>
       <div>
         <div class="total-value" id="d-total-liq">—</div>
@@ -322,7 +322,7 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
     <div class="total-card all">
       <div>
         <div class="total-label">Total including endowment</div>
-        <div class="total-note">All three buckets, minus debt</div>
+        <div class="total-note">Net Chase + MM reserves + endowment</div>
       </div>
       <div>
         <div class="total-value" id="d-total-all">—</div>
@@ -1035,9 +1035,9 @@ function updateDash(){
   const burn=+document.getElementById('db-burn').value;
   document.getElementById('db-burn-v').textContent=fmt(burn);
   const liq=S.mm1+S.mm2, tot=liq+S.endowment, max=14;
-  const netLiq=S.chase+liq-S.debt, netAll=S.chase+tot-S.debt;
-  const cm=(S.chase-S.debt)/burn, lm=netLiq/burn, tm=netAll/burn;
-  document.getElementById('d-chase').textContent=fmt(S.chase);
+  const netChase=S.chase-S.debt, netLiq=netChase+liq, netAll=netChase+tot;
+  const cm=netChase/burn, lm=netLiq/burn, tm=netAll/burn;
+  document.getElementById('d-chase').textContent=fmt(netChase);
   document.getElementById('d-liq').textContent=fmt(liq);
   document.getElementById('d-end').textContent=fmt(S.endowment);
   document.getElementById('d-total-liq').textContent=fmt(netLiq);
