@@ -313,7 +313,7 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
     <div class="total-card liq">
       <div>
         <div class="total-label">Total liquid cash</div>
-        <div class="total-note">Chase + MM reserves — accessible now</div>
+        <div class="total-note">Chase + MM reserves, minus debt</div>
       </div>
       <div>
         <div class="total-value" id="d-total-liq">—</div>
@@ -322,7 +322,7 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
     <div class="total-card all">
       <div>
         <div class="total-label">Total including endowment</div>
-        <div class="total-note">All three buckets combined</div>
+        <div class="total-note">All three buckets, minus debt</div>
       </div>
       <div>
         <div class="total-value" id="d-total-all">—</div>
@@ -1035,13 +1035,14 @@ function updateDash(){
   const burn=+document.getElementById('db-burn').value;
   document.getElementById('db-burn-v').textContent=fmt(burn);
   const liq=S.mm1+S.mm2, tot=liq+S.endowment, max=14;
-  const cm=S.chase/burn, lm=(S.chase+liq)/burn, tm=(S.chase+liq+S.endowment)/burn;
+  const netLiq=S.chase+liq-S.debt, netAll=S.chase+tot-S.debt;
+  const cm=(S.chase-S.debt)/burn, lm=netLiq/burn, tm=netAll/burn;
   document.getElementById('d-chase').textContent=fmt(S.chase);
   document.getElementById('d-liq').textContent=fmt(liq);
   document.getElementById('d-end').textContent=fmt(S.endowment);
-  document.getElementById('d-total-liq').textContent=fmt(S.chase+liq);
-  document.getElementById('d-total-all').textContent=fmt(S.chase+tot);
-  document.getElementById('d-months').textContent=lm.toFixed(1);
+  document.getElementById('d-total-liq').textContent=fmt(netLiq);
+  document.getElementById('d-total-all').textContent=fmt(netAll);
+  document.getElementById('d-months').textContent=Math.max(0,lm).toFixed(1);
   if(S.chaseDate) document.getElementById('d-chase-dt').textContent='As of '+new Date(S.chaseDate+'T00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   ['chase','mm','all'].forEach((k,i)=>{const v=[cm,lm,tm][i];document.getElementById('rc-'+k).textContent=v.toFixed(1)+' mo';document.getElementById('rcf-'+k).style.width=Math.min(100,v/max*100)+'%';});
   // Pipeline bar
