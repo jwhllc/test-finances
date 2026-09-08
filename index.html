@@ -335,6 +335,7 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
     <div class="card">
       <div class="card-hdr">
         <div class="card-title">Operating runway</div>
+        <button onclick="printSummary()" style="padding:5px 14px;background:var(--g2);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;">Print summary</button>
       </div>
       <div class="runway-wrap">
         <div class="runway-bars">
@@ -350,11 +351,8 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
             <div class="cov-lbl"><span>+ Endowment (board vote)</span><span id="rc-all">—</span></div>
             <div class="cov-track"><div class="cov-fill" id="rcf-all" style="background:var(--b2)"></div></div>
           </div>
-          <div class="slider-wrap">
-            <span>Monthly burn</span>
-            <input type="range" id="db-burn" min="150000" max="450000" step="5000" value="290000" oninput="updateDash()">
-            <span class="sv" id="db-burn-v">$290K</span>
-          </div>
+          <div id="db-burn-summary" style="background:var(--bg);border-radius:6px;padding:10px 12px;margin-top:8px;font-size:12px;color:var(--muted);line-height:1.9;"></div>
+          <input type="hidden" id="db-burn" value="290000">
           <p style="font-size:11px;color:var(--faint);margin-top:8px;">Red line = 6-mo sector minimum · Blue dashed = 8-mo BRYC target</p>
         </div>
         <div class="months-big">
@@ -421,7 +419,7 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
     <div class="two-col" style="gap:28px;align-items:start;">
       <div>
         <div class="srow"><label>Months to model</label><input type="range" id="cf-mo" min="1" max="12" step="1" value="3" oninput="updateCF()"><span class="sval" id="cf-mo-v">3 mo</span></div>
-        <div class="srow"><label>Monthly expenses ($)</label><input type="range" id="cf-exp" min="150000" max="450000" step="5000" value="290000" oninput="updateCF()"><span class="sval" id="cf-exp-v">$290K</span></div>
+        <input type="hidden" id="cf-exp" value="290000"><div id="cf-exp-note" style="font-size:12px;color:var(--muted);margin-bottom:10px;background:var(--bg);border-radius:6px;padding:8px 12px;"></div>
         <div class="srow"><label>Anticipated revenue — period total ($)</label><input type="range" id="cf-rev" min="0" max="2000000" step="10000" value="633000" oninput="updateCF()"><span class="sval" id="cf-rev-v">$633K</span></div>
         <div class="srow"><label>Confirmed additional ($)</label><input type="range" id="cf-extra" min="0" max="500000" step="5000" value="160000" oninput="updateCF()"><span class="sval" id="cf-extra-v">$160K</span></div>
       </div>
@@ -436,102 +434,211 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
 
 <!-- ══════════════════════ INVESTMENTS ═══════════════════════════════ -->
 <div class="page" id="page-investments" style="max-width:900px;">
-
   <details class="how-to-panel" style="background:#111;border:.5px solid #333;border-radius:8px;margin-bottom:18px;">
     <summary style="padding:11px 16px;cursor:pointer;font-size:12px;font-weight:600;color:#fff;list-style:none;display:flex;align-items:center;justify-content:space-between;"><span>? How to use this tab &#8212; Investments</span><span style="font-size:10px;color:rgba(255,255,255,.45);">Click to expand</span></summary>
-    <div style="padding:4px 16px 14px;border-top:.5px solid #333;"><ul style="font-size:12px;color:rgba(255,255,255,.8);line-height:1.8;padding-left:18px;margin-top:10px;"><li style="margin-bottom:6px;">This tab tracks your three Wells Fargo accounts and what the portfolio is actually earning.</li><li style="margin-bottom:6px;"><strong>1005-7413</strong> and <strong>8847-4912</strong> are money market operating reserves &#8212; liquid, accessible within 1-2 days by calling Kevin.</li><li style="margin-bottom:6px;"><strong>8805-0682</strong> is the board-designated endowment. Board can vote to access principal but it requires a formal vote.</li><li style="margin-bottom:6px;">Update balances monthly after your WF statement. Admin panel is the gold section at the top.</li><li style="margin-bottom:6px;"><strong>Earned YTD</strong> comes from the most recent advisor log entry &#8212; actual portfolio performance, different from what Molly journals.</li><li style="margin-bottom:6px;">Log every Kevin update in the <strong>Advisor update log</strong>, even between monthly statements.</li></ul></div>
+    <div style="padding:4px 16px 14px;border-top:.5px solid #333;"><ul style="font-size:12px;color:rgba(255,255,255,.8);line-height:1.8;padding-left:18px;margin-top:10px;">
+      <li style="margin-bottom:6px;">This tab has four separate input areas. Each pulls from a different source &#8212; don&#x27;t mix them up.</li>
+      <li style="margin-bottom:6px;"><strong style="color:#fff;">Panel A &#8212; Account balances:</strong> Enter these from your monthly WF statement (Combined Snapshot &#8594; Current Value column) or directly from the WF portal. Update whenever a new statement arrives.</li>
+      <li style="margin-bottom:6px;"><strong style="color:#fff;">Panel B &#8212; What the portfolio earned:</strong> The real economic return &#8212; actual dollars the portfolio made. Get this from the WF portal (Investment Results table) or Kevin&#x27;s report. Different from the taxable income number.</li>
+      <li style="margin-bottom:6px;"><strong style="color:#fff;">Panel C &#8212; Taxable income:</strong> The number Molly uses for accounting. From your monthly statement &#8594; Combined Income Summary &#8594; Total income on all accounts. Separate from what the portfolio actually earned.</li>
+      <li style="margin-bottom:6px;"><strong style="color:#fff;">Panel D &#8212; Kevin&#x27;s log:</strong> A timestamped record of every call or email from Kevin. Log allocation, planned actions, and notes here. If he gives you the earned figure, it goes in Panel B too.</li>
+    </ul></div>
   </details>
-  <div id="inv-admin" style="display:none">
-    <div class="apanel">
-      <div class="apanel-title">✏ Update WF account balances</div>
-      <p style="font-size:11px;color:var(--amber);margin-bottom:10px;">From the Combined Snapshot: "What's inside your Combined Snapshot" table → Current Value column.</p>
-      <div class="agrid">
-        <div class="af"><label>1005-7413 — EBR operating reserve ($)</label><input id="a-mm1" type="number" placeholder="e.g. 537731"></div>
-        <div class="af"><label>8847-4912 — yield operating reserve ($)</label><input id="a-mm2" type="number" placeholder="e.g. 1312012"></div>
-        <div class="af"><label>8805-0682 — endowment ($)</label><input id="a-end" type="number" placeholder="e.g. 1322973"></div>
-        <div class="af"><label>Est. annual income ($) — optional</label><input id="a-eai" type="number" placeholder="e.g. 103627"></div>
-        <div class="af"><label>Statement date</label><input id="a-inv-dt" type="date"></div>
-      </div>
-      <button class="abtn" onclick="saveInv()">Save</button><span class="saved" id="inv-saved">✓ Saved</span>
-    </div>
-  </div>
 
-  <!-- Account KPIs -->
+  <!-- KPI CARDS -->
   <div class="three-col" style="margin-bottom:16px;">
-    <div class="bal-card green"><div class="bal-label">1005-7413 EBR reserve</div><div class="bal-value" id="iv-mm1">—</div><div class="bal-sub"></div><div class="bal-note">Last entered — log an update from Kevin or log in to wellsfargoadvisors.com.</div></div>
-    <div class="bal-card green"><div class="bal-label">8847-4912 yield reserve</div><div class="bal-value" id="iv-mm2">—</div><div class="bal-sub"></div><div class="bal-note">Last entered — log an update from Kevin or log in to wellsfargoadvisors.com.</div></div>
-    <div class="bal-card blue"><div class="bal-label">8805-0682 endowment</div><div class="bal-value" id="iv-end">—</div><div class="bal-sub"></div><div class="bal-note">Last entered — log an update from Kevin or log in to wellsfargoadvisors.com.</div></div>
+    <div class="bal-card green"><div class="bal-label">1005-7413 EBR reserve</div><div class="bal-value" id="iv-mm1">&#8212;</div><div class="bal-sub"></div><div class="bal-note">Last entered &#8212; log in to wellsfargoadvisors.com to update.</div></div>
+    <div class="bal-card green"><div class="bal-label">8847-4912 yield reserve</div><div class="bal-value" id="iv-mm2">&#8212;</div><div class="bal-sub"></div><div class="bal-note">Last entered &#8212; log in to wellsfargoadvisors.com to update.</div></div>
+    <div class="bal-card blue"><div class="bal-label">8805-0682 endowment</div><div class="bal-value" id="iv-end">&#8212;</div><div class="bal-sub"></div><div class="bal-note">Last entered &#8212; log in to wellsfargoadvisors.com to update.</div></div>
   </div>
   <div class="two-col" style="margin-bottom:18px;">
-    <div class="bal-card" style="border-top:3px solid var(--g2)"><div class="bal-label">Earned YTD
-        <div class="tip-wrap"><span class="tip-icon">?</span><div class="tip-box">From the most recent Kevin/advisor update logged below. This is the actual portfolio performance figure — total return including both income and appreciation. Not the same as Molly's taxable income entries.</div></div>
+    <div class="bal-card" style="border-top:3px solid var(--g2)">
+      <div class="bal-label">Earned YTD (real return)
+        <div class="tip-wrap"><span class="tip-icon">?</span><div class="tip-box">Actual dollars the portfolio earned &#8212; includes both income and appreciation. From Panel B below or Kevin&#x27;s report. Different from the taxable income number Molly uses.</div></div>
       </div>
-      <div class="bal-value" id="iv-ytd-d" style="color:var(--g2)">—</div>
-      <div class="bal-sub" id="iv-ytd-sub">Log an advisor update below to populate</div>
+      <div class="bal-value" id="iv-ytd-d" style="color:var(--g2)">&#8212;</div>
+      <div class="bal-sub" id="iv-ytd-sub">Log a Portfolio Earnings update below</div>
     </div>
-    <div class="bal-card" style="border-top:3px solid var(--b2)"><div class="bal-label">YTD return %</div>
-      <div class="bal-value" id="iv-ytd-p" style="color:var(--b2)">—</div>
-      <div class="bal-sub" id="iv-ytd-acct">From most recent advisor update</div>
+    <div class="bal-card" style="border-top:3px solid var(--b2)">
+      <div class="bal-label">Taxable income YTD (Molly&#x27;s number)
+        <div class="tip-wrap"><span class="tip-icon">?</span><div class="tip-box">Dividends declared by the funds for IRS purposes &#8212; what Molly journals each month. Not the same as what the portfolio actually earned in market terms. From Panel C below.</div></div>
+      </div>
+      <div class="bal-value" id="iv-tax-ytd" style="color:var(--b2)">&#8212;</div>
+      <div class="bal-sub" id="iv-tax-sub">Log a Taxable Income entry below</div>
     </div>
   </div>
 
-      <div class="card">
-      <div class="card-hdr"><div class="card-title">Where to see what you've earned</div></div>
-      <details style="border:.5px solid var(--rule);border-radius:8px;margin-bottom:8px;"><summary style="padding:12px 16px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;"><span style="width:22px;height:22px;border-radius:50%;background:var(--g2);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">1</span><span style="font-size:13px;font-weight:600;color:var(--ink);">WF Advisors portal</span><span style="font-size:11px;color:var(--faint);">Live &#183; daily</span><span style="margin-left:auto;font-size:11px;color:var(--faint);">&#9660;</span></summary><div style="padding:0 16px 14px;border-top:.5px solid var(--rule);"><p style="font-size:12px;color:var(--muted);margin:10px 0 8px;line-height:1.7;">Log in at <strong style="color:var(--ink);">wellsfargoadvisors.com</strong> and select your account. Two tables to know:</p><div style="background:var(--bg);border-radius:6px;padding:11px 13px;margin-bottom:8px;"><p style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:5px;">Business Brokerage &#8212; return percentages</p><p style="font-size:12px;color:var(--muted);line-height:1.7;">Headers: Last Month &#183; <strong style="color:var(--g2);">YTD</strong> &#183; 1Y &#183; 3Y &#183; 5Y &#183; Since Inception. The <strong style="color:var(--g2);">YTD column</strong> = year-to-date return %. Log as "YTD return %" below.</p></div><div style="background:var(--bg);border-radius:6px;padding:11px 13px;margin-bottom:8px;"><p style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:5px;">Investment Results &#8212; dollar earnings</p><p style="font-size:12px;color:var(--muted);line-height:1.7;">Headers: Return &#183; Beginning Market Value &#183; Deposits Minus Withdrawals &#183; <strong style="color:var(--g2);">Investment Results</strong> &#183; Ending Market Value. <strong style="color:var(--g2);">Investment Results</strong> = dollars actually earned net of your own cash movements. Log as "YTD earnings $." <strong style="color:var(--ink);">Ending Market Value</strong> = account value.</p></div><div style="background:#d3eba7;border-radius:6px;padding:10px 13px;"><p style="font-size:12px;color:var(--g1);line-height:1.6;"><strong>You don't need to wait for Kevin.</strong> Pull these three numbers from the portal anytime and log them below.</p></div></div></details>
-      <details style="border:.5px solid var(--rule);border-radius:8px;margin-bottom:8px;"><summary style="padding:12px 16px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;"><span style="width:22px;height:22px;border-radius:50%;background:var(--g2);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">2</span><span style="font-size:13px;font-weight:600;color:var(--ink);">Kevin's advisor updates</span><span style="font-size:11px;color:var(--faint);">As of his report date</span><span style="margin-left:auto;font-size:11px;color:var(--faint);">&#9660;</span></summary><div style="padding:0 16px 14px;border-top:.5px solid var(--rule);"><p style="font-size:12px;color:var(--muted);margin:10px 0 8px;line-height:1.7;">Same numbers as the portal, as of his report date. Log after each call &#8212; populates the Earned YTD cards above.</p><div style="background:var(--bg);border-radius:6px;padding:11px 13px;"><p style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px;">Example from a recent update:</p><p style="font-size:12px;color:var(--muted);line-height:1.8;font-style:italic;">"YTD the account has earned <strong style="color:var(--g2);font-style:normal;">$108K or 9.43%</strong> and totals <strong style="color:var(--ink);font-style:normal;">$1,426K</strong> as of last Friday's close. Portfolio: <strong style="color:var(--ink);font-style:normal;">62% Stocks &#183; 20% Bonds &#183; 18% Alts.</strong>"</p></div></div></details>
-      <details style="border:.5px solid var(--rule);border-radius:8px;"><summary style="padding:12px 16px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;"><span style="width:22px;height:22px;border-radius:50%;background:var(--g2);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">3</span><span style="font-size:13px;font-weight:600;color:var(--ink);">Monthly WF statement</span><span style="font-size:11px;color:var(--faint);">Month-end close</span><span style="margin-left:auto;font-size:11px;color:var(--faint);">&#9660;</span></summary><div style="padding:0 16px 14px;border-top:.5px solid var(--rule);"><p style="font-size:12px;color:var(--muted);margin:10px 0 8px;line-height:1.7;">Open <em>Combined Snapshot</em> &#8594; <em>Combined income summary</em> page.</p><div style="background:var(--bg);border-radius:6px;padding:11px 13px;margin-bottom:8px;"><p style="font-size:12px;color:var(--muted);line-height:1.8;"><strong style="color:var(--ink);">"This Period"</strong> = that month only. <strong style="color:var(--ink);">"This Year"</strong> = calendar YTD &#8212; resets Jan 1, not BRYC's fiscal year. Row: <strong style="color:var(--ink);">"Total income on all accounts" (bottom row).</strong> For BRYC FY (Jul&#8211;Jun): add "This Period" from July statements onward.</p></div><div style="background:var(--gold-lt);border:.5px solid #e0c060;border-radius:6px;padding:10px 13px;"><p style="font-size:12px;color:var(--amber);line-height:1.6;"><strong>On Molly's entries:</strong> Taxable income she journals is an IRS figure &#8212; not market performance. Use Investment Results or Kevin's updates for the real picture.</p></div></div></details>
-    </div>  <!-- Advisor log -->
-  <div class="card">
+  <!-- PANEL A: Account balances -->
+  <div class="card" style="margin-bottom:14px;">
     <div class="card-hdr">
-      <div class="card-title">Advisor update log — Kevin / WF reports</div>
-      <div class="tip-wrap"><span class="tip-icon">?</span><div class="tip-box" style="width:280px;">Log entries after any call or email from Kevin. These populate the Earned YTD figure above. Note: entries are saved locally to this browser — not shared across devices.</div></div>
+      <div>
+        <div class="card-title">Panel A &#8212; Account balances</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">From your monthly WF statement <strong>or</strong> the WF portal. Same number either way &#8212; just different timing.</div>
+        <div style="font-size:11px;color:var(--faint);margin-top:2px;">Statement: Combined Snapshot &#8594; &#x201C;What&#x27;s inside your Combined Snapshot&#x201D; &#8594; Current Value column &nbsp;&#183;&nbsp; Portal: log in &#8594; select account &#8594; Ending Market Value</div>
+      </div>
+    </div>
+    <div id="inv-admin" style="display:none;">
+      <div class="apanel" style="margin-top:12px;">
+        <div class="agrid">
+          <div class="af"><label>1005-7413 EBR reserve ($)</label><input id="a-mm1" type="number" placeholder="e.g. 537731"></div>
+          <div class="af"><label>8847-4912 yield reserve ($)</label><input id="a-mm2" type="number" placeholder="e.g. 1312012"></div>
+          <div class="af"><label>8805-0682 endowment ($)</label><input id="a-end" type="number" placeholder="e.g. 1322973"></div>
+          <div class="af"><label>As-of date</label><input id="a-inv-dt" type="date"></div>
+        </div>
+        <button class="abtn" onclick="saveInv()">Save balances</button><span class="saved" id="inv-saved">&#10003; Saved</span>
+      </div>
+    </div>
+    <div id="inv-viewer" style="font-size:12px;color:var(--faint);margin-top:10px;">Sign in as Admin to update balances.</div>
+  </div>
+
+  <!-- PANEL B: What the portfolio earned — split by account -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-hdr">
+      <div>
+        <div class="card-title">Panel B &#8212; What the portfolio actually earned</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Real economic return &#8212; what the portfolio made in market terms. Enter separately for liquid reserves and endowment so you can see each clearly.</div>
+      </div>
+    </div>
+
+    <!-- WHERE TO FIND IT -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 16px;">
+      <div style="background:var(--bg);border-radius:8px;padding:12px 14px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--g2);margin-bottom:8px;">From your monthly statement</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.8;">
+          Open the statement &#8594; scroll past the Combined pages to the <strong style="color:var(--ink);">individual account sections</strong>.<br>
+          Each account has its own <strong style="color:var(--ink);">Progress summary</strong> page showing:<br>
+          &#8594; <strong style="color:var(--ink);">Change in value</strong> (This Period / This Year) &#8212; this is the real return, net of deposits and withdrawals.<br><br>
+          <strong>August 2026 example:</strong><br>
+          1005-7413: <strong>$1,694.15</strong> this month / <strong>$14,798.55</strong> this year<br>
+          8847-4912: <strong>$3,820.36</strong> this month / <strong>$28,974.62</strong> this year<br>
+          8805-0682: <strong>$30,782.54</strong> this month / <strong>$104,518.12</strong> this year
+        </div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:12px 14px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--b2);margin-bottom:8px;">From the WF portal or Kevin</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.8;">
+          Log in at <strong style="color:var(--ink);">wellsfargoadvisors.com</strong> &#8594; select account.<br><br>
+          <strong style="color:var(--ink);">Investment Results table:</strong><br>
+          &#8594; <strong>Investment Results column</strong> = dollars earned (net of your own deposits/withdrawals). This is the same as &#x201C;Change in value&#x201D; on the statement.<br>
+          &#8594; <strong>Ending Market Value</strong> = current balance<br><br>
+          <strong style="color:var(--ink);">Business Brokerage table:</strong><br>
+          &#8594; <strong>YTD column</strong> = year-to-date return %<br><br>
+          Kevin gives you the same numbers when he calls or emails.
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--gold-lt);border:.5px solid #e0c060;border-radius:6px;padding:10px 13px;margin-bottom:14px;font-size:12px;color:var(--amber);line-height:1.6;">
+      <strong>Important:</strong> &#x201C;Change in value&#x201D; is different from the Income Summary. The Income Summary (Molly&#x27;s number) only shows dividends declared &#8212; it excludes appreciation in ETF and mutual fund prices. For the endowment (8805-0682) especially, use &#x201C;Change in value&#x201D; to capture the full return.
+    </div>
+
+    <div id="earn-admin" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <!-- Liquid reserves side -->
+        <div class="apanel">
+          <div style="font-size:12px;font-weight:700;color:var(--g2);margin-bottom:10px;">Liquid reserves (1005-7413 + 8847-4912)</div>
+          <div class="agrid">
+            <div class="af"><label>As-of date</label><input id="earn-liq-dt" type="date"></div>
+            <div class="af"><label>Source</label><select id="earn-liq-src" style="width:100%;padding:7px 10px;font-size:13px;border:.5px solid var(--rule);border-radius:6px;background:var(--white);font-family:proxima-nova,sans-serif;"><option value="statement">Monthly statement</option><option value="portal">WF portal</option><option value="kevin">Kevin</option></select></div>
+            <div class="af"><label>1005-7413 earned this period ($)</label><input id="earn-mm1-p" type="number" placeholder="e.g. 1694"></div>
+            <div class="af"><label>1005-7413 earned this year ($)</label><input id="earn-mm1-y" type="number" placeholder="e.g. 14799"></div>
+            <div class="af"><label>8847-4912 earned this period ($)</label><input id="earn-mm2-p" type="number" placeholder="e.g. 3820"></div>
+            <div class="af"><label>8847-4912 earned this year ($)</label><input id="earn-mm2-y" type="number" placeholder="e.g. 28975"></div>
+          </div>
+        </div>
+        <!-- Endowment side -->
+        <div class="apanel">
+          <div style="font-size:12px;font-weight:700;color:var(--b2);margin-bottom:10px;">Endowment (8805-0682)</div>
+          <div class="agrid">
+            <div class="af"><label>As-of date</label><input id="earn-end-dt" type="date"></div>
+            <div class="af"><label>Source</label><select id="earn-end-src" style="width:100%;padding:7px 10px;font-size:13px;border:.5px solid var(--rule);border-radius:6px;background:var(--white);font-family:proxima-nova,sans-serif;"><option value="statement">Monthly statement</option><option value="portal">WF portal</option><option value="kevin">Kevin</option></select></div>
+            <div class="af"><label>Earned this period ($) &#8212; Change in value</label><input id="earn-end-p" type="number" placeholder="e.g. 30783"></div>
+            <div class="af"><label>Earned this year ($) &#8212; Change in value</label><input id="earn-end-y" type="number" placeholder="e.g. 104518"></div>
+            <div class="af"><label>YTD return %</label><input id="earn-end-pct" type="number" step="0.01" placeholder="e.g. 9.43"></div>
+            <div class="af"><label>Ending market value ($)</label><input id="earn-end-val" type="number" placeholder="e.g. 1518453"></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:10px;align-items:center;">
+        <button class="abtn" onclick="saveEarnings()">Save earnings</button>
+        <span class="saved" id="earn-saved">&#10003; Saved</span>
+      </div>
+      <div id="earn-log" style="margin-top:12px;font-size:12px;color:var(--muted);"></div>
+    </div>
+    <div id="earn-viewer" style="font-size:12px;color:var(--faint);margin-top:10px;">Sign in as Admin to log portfolio earnings.</div>
+  </div>
+
+  <!-- PANEL C: Taxable income -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-hdr">
+      <div>
+        <div class="card-title">Panel C &#8212; Taxable income (Molly&#x27;s number)</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Dividends declared by the funds for IRS purposes. This is what Molly journals each month &#8212; <strong>not</strong> the same as what the portfolio actually earned.</div>
+        <div style="font-size:11px;color:var(--faint);margin-top:2px;">From your monthly WF statement &#8594; Combined Income Summary page &#8594; &#x201C;Total income on all accounts&#x201D; row (bottom row) &#8594; <strong>This Period</strong> column (that month only) and <strong>This Year</strong> column (calendar YTD &#8212; resets Jan 1)</div>
+      </div>
+    </div>
+    <div id="tax-admin" style="display:none;">
+      <div class="apanel" style="margin-top:12px;">
+        <div class="agrid">
+          <div class="af"><label>Statement month</label><select id="tax-mo" style="width:100%;padding:7px 10px;font-size:13px;border:.5px solid var(--rule);border-radius:6px;background:var(--white);font-family:proxima-nova,sans-serif;"><option value="">Select month</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option></select></div>
+          <div class="af"><label>Statement year</label><input id="tax-yr" type="number" placeholder="e.g. 2026"></div>
+          <div class="af"><label>"This Period" $ (that month only)</label><input id="tax-period" type="number" placeholder="e.g. 8420"></div>
+          <div class="af"><label>"This Year" $ (calendar YTD)</label><input id="tax-year" type="number" placeholder="e.g. 62300"></div>
+        </div>
+        <p style="font-size:11px;color:var(--amber);margin-top:8px;">&#9888; "This Year" resets every January 1 &#8212; it does not match BRYC&#x27;s fiscal year (July&#8211;June). For fiscal year totals, add "This Period" across July through June statements.</p>
+        <button class="abtn" onclick="saveTaxIncome()">Save taxable income</button><span class="saved" id="tax-saved">&#10003; Saved</span>
+        <div id="tax-log" style="margin-top:12px;font-size:12px;color:var(--muted);"></div>
+      </div>
+    </div>
+    <div id="tax-viewer" style="font-size:12px;color:var(--faint);margin-top:10px;">Sign in as Admin to log taxable income.</div>
+  </div>
+
+  <!-- PANEL D: Kevin log -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-hdr">
+      <div>
+        <div class="card-title">Panel D &#8212; Kevin&#x27;s log</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Timestamped record of every call or email from Kevin. Log allocation, planned actions, and notes. If he gives you earned figures, also log those in Panel B above.</div>
+      </div>
     </div>
     <div id="wf-log-list"><p style="font-size:13px;color:var(--faint)">No updates logged yet.</p></div>
-  </div>
-
-  <div id="wf-admin" style="display:none">
-    <div class="apanel">
-      <div class="apanel-title">✏ Log a Kevin / WF update</div>
-      <div class="agrid">
-        <div class="af"><label>Date of update</label><input id="wf-dt" type="date"></div>
-        <div class="af"><label>Account</label><select id="wf-acct"><option value="all">All / Combined</option><option value="endowment">8805-0682 Endowment</option><option value="mm1">1005-7413 EBR MM</option><option value="mm2">8847-4912 Yield MM</option></select></div>
-        <div class="af"><label>Account value ($)</label><input id="wf-val" type="number" placeholder="e.g. 1426000"></div>
-        <div class="af"><label>YTD earnings ($)</label><input id="wf-ytd-d" type="number" placeholder="e.g. 108000"></div>
-        <div class="af"><label>YTD return (%)</label><input id="wf-ytd-p" type="number" step="0.01" placeholder="e.g. 9.43"></div>
-        <div class="af"><label>% Stocks</label><input id="wf-stocks" type="number" placeholder="e.g. 62"></div>
-        <div class="af"><label>% Bonds</label><input id="wf-bonds" type="number" placeholder="e.g. 20"></div>
-        <div class="af"><label>% Alternatives</label><input id="wf-alts" type="number" placeholder="e.g. 18"></div>
-        <div class="af"><label>Cash movement ($)</label><input id="wf-cash" type="number" placeholder="+ deposit / - withdrawal"></div>
-        <div class="af" style="grid-column:span 2"><label>Planned action</label><input id="wf-plan" placeholder="e.g. Investing last $100K Sept 7"></div>
-        <div class="af" style="grid-column:span 3"><label>Notes</label><textarea id="wf-notes" placeholder="Paste or summarize what Kevin said…"></textarea></div>
+    <div id="wf-admin" style="display:none;">
+      <div class="apanel" style="margin-top:12px;">
+        <div class="agrid">
+          <div class="af"><label>Date of call / email</label><input id="wf-dt" type="date"></div>
+          <div class="af"><label>Account covered</label><select id="wf-acct"><option value="all">All / Combined</option><option value="endowment">8805-0682 Endowment</option><option value="mm1">1005-7413 EBR MM</option><option value="mm2">8847-4912 Yield MM</option></select></div>
+          <div class="af"><label>% Stocks</label><input id="wf-stocks" type="number" placeholder="e.g. 62"></div>
+          <div class="af"><label>% Bonds</label><input id="wf-bonds" type="number" placeholder="e.g. 20"></div>
+          <div class="af"><label>% Alternatives</label><input id="wf-alts" type="number" placeholder="e.g. 18"></div>
+          <div class="af"><label>Cash movement ($)</label><input id="wf-cash" type="number" placeholder="+ deposit / &#8722; withdrawal"></div>
+          <div class="af" style="grid-column:span 2"><label>Planned action</label><input id="wf-plan" placeholder="e.g. Investing last $100K Sept 7"></div>
+          <div class="af" style="grid-column:span 3"><label>Notes (paste Kevin&#x27;s email or summarize the call)</label><textarea id="wf-notes" style="height:70px;resize:vertical;width:100%;padding:7px 10px;font-size:13px;border:.5px solid var(--rule);border-radius:6px;background:var(--white);font-family:proxima-nova,sans-serif;" placeholder="e.g. Averaged $400K into managed account over 4 months..."></textarea></div>
+        </div>
+        <button class="abtn" onclick="saveWFLog()">Log Kevin update</button><span class="saved" id="wf-saved">&#10003; Logged</span>
       </div>
-      <button class="abtn" onclick="saveWFLog()">Log update</button><span class="saved" id="wf-saved">✓ Logged</span>
     </div>
   </div>
 
-  <!-- IPS — collapsed by default -->
+  <!-- IPS -->
   <div class="card">
     <div class="card-hdr">
       <div class="card-title">IPS spending policy</div>
       <button class="collapse-btn" id="ips-toggle" onclick="toggleIPS()">Show details</button>
     </div>
     <div id="ips-body" style="display:none">
-      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Per BRYC's Investment Policy Statement: authorized annual spend = 4% of the 3-year average June 30 balance across the two MM operating reserve accounts. FY26 draw (~$250K) exceeded authorization (~$105K) — logged as a policy exception.</p>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Per BRYC&#x27;s Investment Policy Statement: authorized annual spend = 4% of the 3-year average June 30 balance across the two MM operating reserve accounts. FY26 draw (~$250K) exceeded authorization (~$105K) &#8212; logged as a policy exception.</p>
       <table class="tbl">
         <thead><tr><th>June 30</th><th class="r">1005-7413</th><th class="r">8847-4912</th><th class="r">Combined</th></tr></thead>
         <tbody>
           <tr><td>June 30, 2024</td><td class="r">$2,017,067</td><td class="r">$993,173</td><td class="r">$3,010,240</td></tr>
           <tr><td>June 30, 2025</td><td class="r">$1,980,244</td><td class="r">$1,026,594</td><td class="r">$3,006,838</td></tr>
-          <tr><td>June 30, 2026 (current)</td><td class="r" id="ips-m1">—</td><td class="r" id="ips-m2">—</td><td class="r" id="ips-26">—</td></tr>
-          <tr class="tot"><td>3-year average</td><td></td><td></td><td class="r" id="ips-avg">—</td></tr>
-          <tr class="tot"><td>4% authorized spend (FY27)</td><td></td><td></td><td class="r pos" id="ips-auth">—</td></tr>
+          <tr><td>June 30, 2026 (current)</td><td class="r" id="ips-m1">&#8212;</td><td class="r" id="ips-m2">&#8212;</td><td class="r" id="ips-26">&#8212;</td></tr>
+          <tr class="tot"><td>3-year average</td><td></td><td></td><td class="r" id="ips-avg">&#8212;</td></tr>
+          <tr class="tot"><td>4% authorized spend (FY27)</td><td></td><td></td><td class="r pos" id="ips-auth">&#8212;</td></tr>
         </tbody>
       </table>
     </div>
   </div>
-</div>
 
-<!-- ══════════════════════ PIPELINE ═══════════════════════════════════ -->
 <div class="page" id="page-pipeline">
  
 
@@ -957,6 +1064,7 @@ let S={
   chase:834117,debt:67078,chaseDate:'',
   mm1:537731,mm2:1312012,endowment:1322973,eai:103627,invDate:'',
   expMonthly:[232893,254792,266483,332585,255230,234672,236984,266711,245901,314456,228487,187168],expFetchedAt:'seed',expManual:[null,null,null,null,null,null,null,null,null,null,null,null],
+  earnings:[],taxLog:[],
   pipelineFetchedAt:null,
   wfLog:[{dt:'2026-08-01',acct:'endowment',val:1426000,ytdD:108000,ytdP:9.43,stocks:62,bonds:20,alts:18,cashMv:100000,plan:'Investing last $100K Sept 7th',notes:'Averaged $400K into managed account over 4 months. $200K already invested, $100K added today. Account lost $2K since June 5th board report.'}],
   pledges:[
@@ -981,7 +1089,7 @@ let S={
 };
 
 function save(){try{localStorage.setItem('bryc_v3',JSON.stringify(S));}catch(e){}}
-function load(){try{const d=JSON.parse(localStorage.getItem('bryc_v3'));if(d){const{pledges:sp,wfLog:wl,...rest}=d;Object.assign(S,rest);if(sp&&sp.length>0)S.pledges=sp;if(wl&&wl.length>0)S.wfLog=wl;if(d.expManual)S.expManual=d.expManual;}}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem('bryc_v3'));if(d){const{pledges:sp,wfLog:wl,...rest}=d;Object.assign(S,rest);if(sp&&sp.length>0)S.pledges=sp;if(wl&&wl.length>0)S.wfLog=wl;if(d.expManual)S.expManual=d.expManual;if(d.earnings)S.earnings=d.earnings;if(d.taxLog)S.taxLog=d.taxLog;}}catch(e){}}
 function flash(id){const e=document.getElementById(id);e.style.display='inline';setTimeout(()=>e.style.display='none',2000);}
 
 // ── AUTH ──────────────────────────────────────────────────────────────
@@ -992,7 +1100,8 @@ function setRole(r){
   document.getElementById('auth').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('role-pill').textContent=r==='admin'?'Admin':'Viewer';
-  document.querySelectorAll('[id$="-admin"],[id="wf-admin"]').forEach(el=>el.style.display=r==='admin'?'block':'none');
+  document.querySelectorAll('[id$="-admin"],[id="wf-admin"]').forEach(function(el){el.style.display=r==='admin'?'block':'none';});
+  ['inv-viewer','earn-viewer','tax-viewer'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display=r==='admin'?'none':'block';});
   init();
 }
 function signOut(){role=null;document.getElementById('auth').style.display='flex';document.getElementById('app').style.display='none';document.getElementById('pin-in').value='';document.getElementById('auth-err').textContent='';}
@@ -1017,7 +1126,46 @@ function toggleIPS(){
 
 // ── SAVE HELPERS ──────────────────────────────────────────────────────
 function saveCash(){const c=+document.getElementById('a-chase').value,d=+document.getElementById('a-debt').value,dt=document.getElementById('a-chase-dt').value;if(c)S.chase=c;if(d)S.debt=d;if(dt)S.chaseDate=dt;save();refreshAll();flash('cash-saved');}
-function saveInv(){const m1=+document.getElementById('a-mm1').value,m2=+document.getElementById('a-mm2').value,en=+document.getElementById('a-end').value,ea=+document.getElementById('a-eai').value,dt=document.getElementById('a-inv-dt').value;if(m1)S.mm1=m1;if(m2)S.mm2=m2;if(en)S.endowment=en;if(ea)S.eai=ea;if(dt)S.invDate=dt;save();refreshAll();flash('inv-saved');}
+function saveInv(){var m1=+document.getElementById('a-mm1').value,m2=+document.getElementById('a-mm2').value,en=+document.getElementById('a-end').value,dt=document.getElementById('a-inv-dt').value;if(m1)S.mm1=m1;if(m2)S.mm2=m2;if(en)S.endowment=en;if(dt)S.invDate=dt;save();refreshAll();flash('inv-saved');}
+function saveEarnings(){
+  var g=function(id){var el=document.getElementById(id);return el?el.value:'';};
+  var e={
+    dt:g('earn-liq-dt')||g('earn-end-dt'),
+    // Liquid reserves
+    liq:{src:g('earn-liq-src'),dt:g('earn-liq-dt'),
+      mm1p:+g('earn-mm1-p')||null,mm1y:+g('earn-mm1-y')||null,
+      mm2p:+g('earn-mm2-p')||null,mm2y:+g('earn-mm2-y')||null},
+    // Endowment
+    end:{src:g('earn-end-src'),dt:g('earn-end-dt'),
+      period:+g('earn-end-p')||null,year:+g('earn-end-y')||null,
+      pct:+g('earn-end-pct')||null,val:+g('earn-end-val')||null}
+  };
+  if(!S.earnings) S.earnings=[];
+  S.earnings.unshift(e);
+  save();updateInvPage();flash('earn-saved');
+  var log=document.getElementById('earn-log');
+  if(log&&S.earnings.length){
+    var r=S.earnings[0];
+    var liqTotal=(r.liq.mm1p||0)+(r.liq.mm2p||0);
+    log.innerHTML='<strong>Last saved:</strong>'
+      +(liqTotal?' &nbsp;Liquid reserves this period: <strong>'+fmtF(liqTotal)+'</strong>':'')
+      +(r.end.period?' &nbsp;Endowment this period: <strong>'+fmtF(r.end.period)+'</strong>':'');
+  }
+}
+
+function saveTaxIncome(){
+  var e={mo:document.getElementById('tax-mo').value,yr:document.getElementById('tax-yr').value,period:+document.getElementById('tax-period').value||null,year:+document.getElementById('tax-year').value||null};
+  if(!S.taxLog) S.taxLog=[];
+  S.taxLog.unshift(e);
+  save();updateInvPage();flash('tax-saved');
+  var el=document.getElementById('tax-log');
+  if(el&&S.taxLog.length){
+    el.innerHTML='<strong>Last logged:</strong> '+S.taxLog[0].mo+' '+S.taxLog[0].yr
+      +(S.taxLog[0].period?' &nbsp;&#183;&nbsp; This Period: <strong>'+fmtF(S.taxLog[0].period)+'</strong>':'')
+      +(S.taxLog[0].year?' &nbsp;&#183;&nbsp; This Year: <strong>'+fmtF(S.taxLog[0].year)+'</strong>':'');
+  }
+}
+
 function saveWFLog(){
   const e={dt:document.getElementById('wf-dt').value,acct:document.getElementById('wf-acct').value,val:+document.getElementById('wf-val').value||null,ytdD:+document.getElementById('wf-ytd-d').value||null,ytdP:+document.getElementById('wf-ytd-p').value||null,stocks:+document.getElementById('wf-stocks').value||null,bonds:+document.getElementById('wf-bonds').value||null,alts:+document.getElementById('wf-alts').value||null,cashMv:+document.getElementById('wf-cash').value||null,plan:document.getElementById('wf-plan').value,notes:document.getElementById('wf-notes').value};
   S.wfLog.unshift(e);save();renderWFLog();updateInvPage();flash('wf-saved');
@@ -1032,8 +1180,29 @@ function refreshAll(){updateDash();updateCashPage();updateInvPage();renderPipeli
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────
 function updateDash(){
-  const burn=+document.getElementById('db-burn').value;
-  document.getElementById('db-burn-v').textContent=fmt(burn);
+  // Compute burn from budget for current fiscal month window
+  var expenses=getEffectiveExpenses?getEffectiveExpenses():[232893,254792,266483,332585,255230,234672,236984,266711,245901,314456,228487,187168];
+  var fyNow=(new Date().getMonth()-6+12)%12;
+  // Average burn = full year total / 12
+  var annualTotal=expenses.reduce(function(a,b){return a+b;},0);
+  var avgBurn=Math.round(annualTotal/12);
+  // Next 3 months burn
+  var next3=Math.round((expenses[fyNow]+expenses[(fyNow+1)%12]+expenses[(fyNow+2)%12])/3);
+  // Next 6 months burn
+  var next6sum=0;for(var i=0;i<6;i++)next6sum+=expenses[(fyNow+i)%12];var next6=Math.round(next6sum/6);
+  // Rest of FY (remaining months from now to June = 11-fyNow+1 months)
+  var remMonths=12-fyNow;
+  var remSum=0;for(var i=0;i<remMonths;i++)remSum+=expenses[(fyNow+i)%12];var remBurn=Math.round(remSum/remMonths);
+  var burn=next3; // Use next-3 as the primary burn for runway calc
+  document.getElementById('db-burn').value=burn;
+  var burnSummary=document.getElementById('db-burn-summary');
+  if(burnSummary){
+    burnSummary.innerHTML='<strong style="color:var(--ink);">Avg monthly burn from budget:</strong><br>'
+      +'Next 3 months: <strong style="color:var(--ink);">'+fmt(next3)+'</strong> &nbsp;·&nbsp; '
+      +'Next 6 months: <strong style="color:var(--ink);">'+fmt(next6)+'</strong> &nbsp;·&nbsp; '
+      +'Rest of FY: <strong style="color:var(--ink);">'+fmt(remBurn)+'</strong><br>'
+      +'<span style="font-size:11px;">(Full year avg: '+fmt(avgBurn)+' · Runway calc uses next 3 months)</span>';
+  }
   const liq=S.mm1+S.mm2, tot=liq+S.endowment, max=14;
   const netChase=S.chase-S.debt, netLiq=netChase+liq, netAll=netChase+tot;
   const cm=netChase/burn, lm=netLiq/burn, tm=netAll/burn;
@@ -1064,12 +1233,21 @@ function updateCashPage(){
   updateCF();
 }
 function updateCF(){
-  const mo=+document.getElementById('cf-mo').value, exp=+document.getElementById('cf-exp').value, rev=+document.getElementById('cf-rev').value, extra=+document.getElementById('cf-extra').value;
+  const mo=+document.getElementById('cf-mo').value, rev=+document.getElementById('cf-rev').value, extra=+document.getElementById('cf-extra').value;
   document.getElementById('cf-mo-v').textContent=mo+' mo';
-  document.getElementById('cf-exp-v').textContent=fmt(exp);
+  // Use budget for expenses
+  var cfExpenses=getEffectiveExpenses?getEffectiveExpenses():[232893,254792,266483,332585,255230,234672,236984,266711,245901,314456,228487,187168];
+  var cfFyNow=(new Date().getMonth()-6+12)%12;
+  var exp=0; var cfMonthNames=[];
+  for(var ci=0;ci<mo;ci++){var fi=(cfFyNow+ci)%12;exp+=cfExpenses[fi];cfMonthNames.push(FY_MOS[fi].slice(0,3)+' '+fmt(cfExpenses[fi]));}
+  document.getElementById('cf-exp').value=Math.round(exp/mo);
+  var cfNote=document.getElementById('cf-exp-note');
+  if(cfNote) cfNote.innerHTML='<strong style="color:var(--ink);">Budgeted expenses</strong> ('+mo+' months): '
+    +cfMonthNames.join(' &nbsp;·&nbsp; ')
+    +'<br><strong style="color:var(--ink);">Total: '+fmtF(exp)+'</strong>';
   document.getElementById('cf-rev-v').textContent=fmt(rev);
   document.getElementById('cf-extra-v').textContent=fmt(extra);
-  const tExp=exp*mo, net=S.chase+rev+extra-tExp-S.debt, max=S.chase+rev+extra;
+  const tExp=exp, net=S.chase+rev+extra-tExp-S.debt, max=S.chase+rev+extra;
   const bars=[{l:'Starting cash',v:S.chase,c:'#006b56'},{l:`+ Revenue (${mo} mo)`,v:rev,c:'#4da08f'},{l:'+ Confirmed additional',v:extra,c:'#d3eba7'},{l:`− Expenses (${mo} mo)`,v:tExp,c:'#BF9000',neg:true},{l:'− Debt + credit cards',v:S.debt,c:'#F09595',neg:true}];
   document.getElementById('cf-bars').innerHTML=bars.map(b=>`<div class="brow"><span class="bl">${b.l}</span><div class="btrack"><div class="bfill" style="background:${b.c};width:${Math.min(100,b.v/max*100)}%"></div></div><span class="bv ${b.neg?'neg':''}">${b.neg?'(':''}${fmt(b.v)}${b.neg?')':''}</span></div>`).join('')+`<div class="brow bdiv" style="font-weight:600"><span class="bl">Projected end cash</span><div class="btrack"><div class="bfill" style="background:${net>=0?'#006b56':'#8B1A1A'};width:${Math.max(2,Math.abs(net)/max*100)}%"></div></div><span class="bv ${net<0?'neg':''}">${fmtF(net)}</span></div>`;
   const v=document.getElementById('cf-verdict'), m=(net/exp).toFixed(1);
@@ -1083,14 +1261,38 @@ function updateInvPage(){
   document.getElementById('iv-mm1').textContent=fmt(S.mm1);
   document.getElementById('iv-mm2').textContent=fmt(S.mm2);
   document.getElementById('iv-end').textContent=fmt(S.endowment);
-  const recent=S.wfLog&&S.wfLog.length?S.wfLog[0]:null;
-  if(recent&&recent.ytdD){
-    document.getElementById('iv-ytd-d').textContent=fmt(recent.ytdD);
-    document.getElementById('iv-ytd-p').textContent=recent.ytdP?recent.ytdP.toFixed(2)+'%':'—';
-    const lbl={all:'All accounts',endowment:'Endowment',mm1:'EBR MM',mm2:'Yield MM'}[recent.acct]||recent.acct;
-    const dt=recent.dt?new Date(recent.dt+'T00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
-    document.getElementById('iv-ytd-sub').textContent=dt?'As of '+dt:'Most recent log';
-    document.getElementById('iv-ytd-acct').textContent=lbl;
+  // Panel B: earnings — show combined liquid + endowment in KPI cards
+  var recentEarn=S.earnings&&S.earnings.length?S.earnings[0]:null;
+  if(recentEarn){
+    var liqTotal=(recentEarn.liq&&recentEarn.liq.mm1p?recentEarn.liq.mm1p:0)+(recentEarn.liq&&recentEarn.liq.mm2p?recentEarn.liq.mm2p:0);
+    var endTotal=recentEarn.end&&recentEarn.end.period?recentEarn.end.period:0;
+    var combined=liqTotal+endTotal;
+    if(combined){
+      safeSet('iv-ytd-d',fmtF(combined));
+      var earnDt=recentEarn.dt?new Date(recentEarn.dt+'T00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+      var srcLabel=recentEarn.end&&recentEarn.end.src?recentEarn.end.src:(recentEarn.liq&&recentEarn.liq.src?recentEarn.liq.src:'');
+      var srcStr=srcLabel==='kevin'?'Kevin':srcLabel==='statement'?'statement':'WF portal';
+      safeSet('iv-ytd-sub',(earnDt?'As of '+earnDt+' · ':'')+'via '+srcStr
+        +(liqTotal?' · Liquid: '+fmtF(liqTotal):'')
+        +(endTotal?' · Endowment: '+fmtF(endTotal):''));
+    }
+    // Also restore earn-log if page reloads
+    var log=document.getElementById('earn-log');
+    if(log&&liqTotal+endTotal){
+      log.innerHTML='<strong>Last saved:</strong>'
+        +(liqTotal?' &nbsp;Liquid reserves this period: <strong>'+fmtF(liqTotal)+'</strong>':'')
+        +(endTotal?' &nbsp;Endowment this period: <strong>'+fmtF(endTotal)+'</strong>':'');
+    }
+  }
+  // Panel C: taxable income
+  var recentTax=S.taxLog&&S.taxLog.length?S.taxLog[0]:null;
+  if(recentTax&&recentTax.period){
+    safeSet('iv-tax-ytd',fmtF(recentTax.period));
+    safeSet('iv-tax-sub',(recentTax.mo&&recentTax.yr?recentTax.mo+' '+recentTax.yr+' — This Period':'Last logged'));
+    var taxLogEl=document.getElementById('tax-log');
+    if(taxLogEl) taxLogEl.innerHTML='<strong>Last logged:</strong> '+recentTax.mo+' '+recentTax.yr
+      +(recentTax.period?' &nbsp;&#183;&nbsp; This Period: <strong>'+fmtF(recentTax.period)+'</strong>':'')
+      +(recentTax.year?' &nbsp;&#183;&nbsp; This Year (calendar): <strong>'+fmtF(recentTax.year)+'</strong>':'');
   }
   const c26=S.mm1+S.mm2, avg=(3010240+3006838+c26)/3;
   document.getElementById('ips-m1').textContent=fmtF(S.mm1);
@@ -1223,6 +1425,73 @@ function setFCMode(mode){
   if(sBtn) sBtn.style.cssText=isAdv?offStyle:onStyle;
   if(aBtn) aBtn.style.cssText=isAdv?onStyle:offStyle;
   updateFC();
+}
+
+
+function printSummary(){
+  var expenses=getEffectiveExpenses?getEffectiveExpenses():[232893,254792,266483,332585,255230,234672,236984,266711,245901,314456,228487,187168];
+  var fyNow=(new Date().getMonth()-6+12)%12;
+  var next3=Math.round((expenses[fyNow]+expenses[(fyNow+1)%12]+expenses[(fyNow+2)%12])/3);
+  var next6sum=0;for(var i=0;i<6;i++)next6sum+=expenses[(fyNow+i)%12];var next6=Math.round(next6sum/6);
+  var remMonths=12-fyNow;var remSum=0;
+  for(var i=0;i<remMonths;i++)remSum+=expenses[(fyNow+i)%12];
+  var remBurn=Math.round(remSum/remMonths);
+  var netChase=S.chase-S.debt, liq=S.mm1+S.mm2;
+  var netLiq=netChase+liq;
+  var today=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  var curMo=FY_MOS[fyNow];
+  var mo3=FY_MOS[(fyNow+2)%12],mo6=FY_MOS[(fyNow+5)%12],moEnd=FY_MOS[11];
+  var w=window.open('','_blank','width=720,height=900');
+  w.document.write('<!DOCTYPE html><html><head><title>BRYC Financial Summary</title>'
+    +'<link rel="stylesheet" href="https://use.typekit.net/hte4vgd.css">'
+    +'<style>'
+    +'*{box-sizing:border-box;margin:0;padding:0;} body{font-family:proxima-nova,sans-serif;color:#061b17;padding:48px;font-size:14px;}'
+    +'h1{font-size:22px;font-weight:800;color:#006b56;margin-bottom:4px;}'
+    +'.sub{font-size:13px;color:#6b8f89;margin-bottom:32px;}'
+    +'.section{margin-bottom:28px;}'
+    +'.section-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6b8f89;margin-bottom:10px;border-bottom:1px solid #c2dbd7;padding-bottom:6px;}'
+    +'.row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:.5px solid #e8f2f0;}'
+    +'.row:last-child{border-bottom:none;}'
+    +'.label{font-size:13px;color:#3a5c55;}'
+    +'.value{font-size:16px;font-weight:700;color:#006b56;}'
+    +'.value.blue{color:#0a52a9;}'
+    +'.value.gray{color:#6b8f89;}'
+    +'.total-row{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-top:2px solid #006b56;margin-top:4px;}'
+    +'.total-label{font-size:13px;font-weight:700;}'
+    +'.total-value{font-size:20px;font-weight:800;color:#006b56;}'
+    +'.runway-row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:.5px solid #e8f2f0;}'
+    +'.runway-mo{font-size:13px;color:#3a5c55;}'
+    +'.runway-burn{font-size:12px;color:#6b8f89;}'
+    +'.runway-val{font-size:16px;font-weight:700;color:#006b56;}'
+    +'.note{font-size:11px;color:#6b8f89;margin-top:24px;line-height:1.6;}'
+    +'@media print{body{padding:32px;} button{display:none;}}'
+    +'</style></head><body>'
+    +'<h1>BRYC Financial Summary</h1>'
+    +'<div class="sub">'+today+' &nbsp;|&nbsp; Prepared by Josh Howard, Chief of Staff</div>'
+
+    +'<div class="section">'
+    +'<div class="section-title">Cash position</div>'
+    +'<div class="row"><span class="label">Chase operating (net of debt)</span><span class="value">'+fmtF(netChase)+'</span></div>'
+    +'<div class="row"><span class="label">WF liquid reserves (1005-7413 + 8847-4912)</span><span class="value">'+fmtF(liq)+'</span></div>'
+    +'<div class="total-row"><span class="total-label">Total liquid</span><span class="total-value">'+fmtF(netLiq)+'</span></div>'
+    +'</div>'
+
+    +'<div class="section">'
+    +'<div class="section-title">Endowment</div>'
+    +'<div class="row"><span class="label">WF endowment (8805-0682) &nbsp;<span style="font-size:11px;color:#6b8f89;">Board vote required to access</span></span><span class="value blue">'+fmtF(S.endowment)+'</span></div>'
+    +'</div>'
+
+    +'<div class="section">'
+    +'<div class="section-title">Operating runway &mdash; as of '+curMo+'</div>'
+    +'<div class="runway-row"><span><span class="runway-mo">Next 3 months (through '+mo3+')</span><br><span class="runway-burn">Avg monthly budget: '+fmtF(next3)+'</span></span><span class="runway-val">'+Math.max(0,(netLiq/next3)).toFixed(1)+' months</span></div>'
+    +'<div class="runway-row"><span><span class="runway-mo">Next 6 months (through '+mo6+')</span><br><span class="runway-burn">Avg monthly budget: '+fmtF(next6)+'</span></span><span class="runway-val">'+Math.max(0,(netLiq/next6)).toFixed(1)+' months</span></div>'
+    +'<div class="runway-row"><span><span class="runway-mo">Rest of fiscal year (through June)</span><br><span class="runway-burn">Avg monthly budget: '+fmtF(remBurn)+'</span></span><span class="runway-val">'+Math.max(0,(netLiq/remBurn)).toFixed(1)+' months</span></div>'
+    +'</div>'
+
+    +'<div class="note">Numbers reflect the most recent balances entered in the dashboard and FY27 operating budget. Runway is calculated as total liquid cash divided by average monthly budgeted expenses for each period. Endowment requires a board vote to access and is not included in liquid totals.</div>'
+    +'<br><button onclick="window.print()" style="padding:8px 20px;background:#006b56;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;">Print / Save as PDF</button>'
+    +'</body></html>');
+  w.document.close();
 }
 
 function initFCStartMonth(){var sel=document.getElementById('fc-start-mo');if(!sel)return;sel.value=String((new Date().getMonth()-6+12)%12);setFCMode('advanced');}
