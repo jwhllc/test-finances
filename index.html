@@ -577,9 +577,34 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
     </div>
 
     <!-- WHERE TO FIND IT -->
-    <div style="background:var(--bg);border-radius:8px;padding:12px 14px;margin:12px 0 14px;font-size:12px;color:var(--muted);line-height:1.8;">
-      <strong style="color:var(--ink);">Where to find it:</strong> Open your monthly WF statement &#8594; <strong style="color:var(--ink);">Combined Income Summary</strong> page &#8594; bottom row labeled <strong style="color:var(--ink);">"Total income on all accounts"</strong> &#8594; <strong style="color:var(--ink);">"This Period"</strong> column (that month only). Enter that one number here each month.<br>
-      <span style="font-size:11px;color:var(--faint);">The "This Year" column resets January 1 and does not match BRYC&#x27;s fiscal year &#8212; ignore it for fiscal tracking. Use this log instead.</span>
+    <div style="background:var(--bg);border-radius:8px;padding:14px 16px;margin:12px 0 14px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-bottom:10px;">Where to find this number each month</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
+        <div style="background:var(--white);border:.5px solid var(--rule);border-radius:6px;padding:9px 11px;text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:var(--g2);margin-bottom:4px;">1</div>
+          <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:3px;">Open the statement</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.6;">Your monthly WF Combined Snapshot PDF</div>
+        </div>
+        <div style="background:var(--white);border:.5px solid var(--rule);border-radius:6px;padding:9px 11px;text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:var(--g2);margin-bottom:4px;">2</div>
+          <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:3px;">Find the right page</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.6;">Look for the page titled <strong>"Combined Income Summary"</strong> &#8212; it&#x27;s in the Combined Snapshot section near the front</div>
+        </div>
+        <div style="background:var(--white);border:.5px solid var(--rule);border-radius:6px;padding:9px 11px;text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:var(--g2);margin-bottom:4px;">3</div>
+          <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:3px;">Find the right row</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.6;">Scroll to the <strong>very bottom row</strong> of that table: <strong>"Total income on all accounts"</strong></div>
+        </div>
+        <div style="background:var(--white);border:.5px solid var(--rule);border-radius:6px;padding:9px 11px;text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:var(--g2);margin-bottom:4px;">4</div>
+          <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:3px;">Grab "This Period"</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.6;">Use the <strong>"This Period"</strong> column only &#8212; that&#x27;s just that one month. Ignore "This Year" (resets Jan 1)</div>
+        </div>
+      </div>
+      <div style="background:#d3eba7;border-radius:6px;padding:10px 13px;font-size:12px;color:var(--g1);line-height:1.7;">
+        <strong>August 2026 example:</strong> Combined Income Summary &#8594; "Total income on all accounts" row &#8594; This Period column &#8594; <strong>$7,614.87</strong>. That&#x27;s the number that was pre-loaded for August.<br>
+        <span style="font-size:11px;">July 2026 was $7,232.66 using the same row and column on the July statement.</span>
+      </div>
     </div>
 
     <!-- FISCAL YTD TOTAL — always visible -->
@@ -608,7 +633,7 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
             </select>
           </div>
           <div class="af"><label>Fiscal year (e.g. 2027 for FY July 2026&#8211;June 2027)</label><input id="tax-fy" type="number" placeholder="e.g. 2027" value="2027"></div>
-          <div class="af"><label>"This Period" $ &#8212; Total income on all accounts</label><input id="tax-period" type="number" placeholder="e.g. 7614.87"></div>
+          <div class="af"><label>"This Period" $ from Combined Income Summary &#8212; bottom row, left column</label><input id="tax-period" type="number" placeholder="e.g. 7614.87"></div>
         </div>
         <div style="display:flex;gap:10px;align-items:center;margin-top:10px;">
           <button class="abtn" onclick="saveTaxIncome()">Add month</button>
@@ -1091,7 +1116,7 @@ let S={
   chase:834117,debt:67078,chaseDate:'',
   mm1:537731,mm2:1312012,endowment:1322973,eai:103627,invDate:'',
   expMonthly:[232893,254792,266483,332585,255230,234672,236984,266711,245901,314456,228487,187168],expFetchedAt:'seed',expManual:[null,null,null,null,null,null,null,null,null,null,null,null],
-  earnings:[],taxLog:[],
+  earnings:[],taxLog:[{mo:"July",fy:"2027",period:7232.66}],
   pipelineFetchedAt:null,
   wfLog:[{dt:'2026-08-01',acct:'endowment',val:1426000,ytdD:108000,ytdP:9.43,stocks:62,bonds:20,alts:18,cashMv:100000,plan:'Investing last $100K Sept 7th',notes:'Averaged $400K into managed account over 4 months. $200K already invested, $100K added today. Account lost $2K since June 5th board report.'}],
   pledges:[
@@ -1121,10 +1146,18 @@ function load(){try{const d=JSON.parse(localStorage.getItem('bryc_v3'));if(d){co
     if(d.taxLog){
       S.taxLog=d.taxLog.map(function(e){return e.fy?e:Object.assign({},e,{fy:'2027'});});
     }}
-// Seed July FY27 if no tax log exists yet
+// Always ensure July FY2027 is in the log — merge, don't overwrite
 function seedTaxIfEmpty(){
-  if(!S.taxLog||S.taxLog.length===0){
-    S.taxLog=[{mo:'July',fy:'2027',period:7232.66}];
+  if(!S.taxLog) S.taxLog=[];
+  var hasJuly=S.taxLog.some(function(e){return e.mo==='July'&&e.fy==='2027';});
+  if(!hasJuly){
+    S.taxLog.push({mo:'July',fy:'2027',period:7232.66});
+    // Re-sort by fiscal month order
+    var FY_ORDER=['July','August','September','October','November','December','January','February','March','April','May','June'];
+    S.taxLog.sort(function(a,b){
+      if(a.fy!==b.fy) return +a.fy - +b.fy;
+      return FY_ORDER.indexOf(a.mo)-FY_ORDER.indexOf(b.mo);
+    });
     save();
   }
 }}catch(e){}}
