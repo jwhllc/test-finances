@@ -1091,7 +1091,7 @@ let S={
   chase:834117,debt:67078,chaseDate:'',
   mm1:537731,mm2:1312012,endowment:1322973,eai:103627,invDate:'',
   expMonthly:[232893,254792,266483,332585,255230,234672,236984,266711,245901,314456,228487,187168],expFetchedAt:'seed',expManual:[null,null,null,null,null,null,null,null,null,null,null,null],
-  earnings:[],taxLog:[{mo:"July",fy:"2027",period:7232.66},{mo:"August",fy:"2027",period:7614.87}],
+  earnings:[],taxLog:[],
   pipelineFetchedAt:null,
   wfLog:[{dt:'2026-08-01',acct:'endowment',val:1426000,ytdD:108000,ytdP:9.43,stocks:62,bonds:20,alts:18,cashMv:100000,plan:'Investing last $100K Sept 7th',notes:'Averaged $400K into managed account over 4 months. $200K already invested, $100K added today. Account lost $2K since June 5th board report.'}],
   pledges:[
@@ -1116,7 +1116,18 @@ let S={
 };
 
 function save(){try{localStorage.setItem('bryc_v3',JSON.stringify(S));}catch(e){}}
-function load(){try{const d=JSON.parse(localStorage.getItem('bryc_v3'));if(d){const{pledges:sp,wfLog:wl,...rest}=d;Object.assign(S,rest);if(sp&&sp.length>0)S.pledges=sp;if(wl&&wl.length>0)S.wfLog=wl;if(d.expManual)S.expManual=d.expManual;if(d.earnings)S.earnings=d.earnings;if(d.taxLog)S.taxLog=d.taxLog;}}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem('bryc_v3'));if(d){const{pledges:sp,wfLog:wl,...rest}=d;Object.assign(S,rest);if(sp&&sp.length>0)S.pledges=sp;if(wl&&wl.length>0)S.wfLog=wl;if(d.expManual)S.expManual=d.expManual;if(d.earnings)S.earnings=d.earnings;
+    // Migrate old taxLog entries that lack fy field
+    if(d.taxLog){
+      S.taxLog=d.taxLog.map(function(e){return e.fy?e:Object.assign({},e,{fy:'2027'});});
+    }}
+// Seed July FY27 if no tax log exists yet
+function seedTaxIfEmpty(){
+  if(!S.taxLog||S.taxLog.length===0){
+    S.taxLog=[{mo:'July',fy:'2027',period:7232.66}];
+    save();
+  }
+}}catch(e){}}
 function flash(id){const e=document.getElementById(id);e.style.display='inline';setTimeout(()=>e.style.display='none',2000);}
 
 // ── AUTH ──────────────────────────────────────────────────────────────
@@ -1850,7 +1861,7 @@ function safeSet(id,val,prop){prop=prop||"textContent";var el=document.getElemen
 function initTooltips(){document.querySelectorAll(".tip-wrap").forEach(function(w){var icon=w.querySelector(".tip-icon"),box=w.querySelector(".tip-box");if(!icon||!box)return;icon.addEventListener("mouseenter",function(){var r=icon.getBoundingClientRect();box.style.left=Math.max(10,Math.min(r.left+r.width/2-130,window.innerWidth-272))+"px";box.style.top=(r.top-8)+"px";box.style.transform="translateY(-100%)";});});}
 
 function init(){
-  load(); refreshAll(); initCharts(); initTooltips(); initFCStartMonth(); renderTaxLog();
+  load(); seedTaxIfEmpty(); refreshAll(); initCharts(); initTooltips(); initFCStartMonth(); renderTaxLog();
   if(S.expMonthly&&S.expMonthly.length){
     var ts=S.expFetchedAt?new Date(S.expFetchedAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
     if(ts){safeSet('sync-exp-stat','✓ Last synced '+ts);safeSet('sync-exp-stat','var(--b2)','style.color');}
