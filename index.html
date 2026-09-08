@@ -567,26 +567,53 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
     <div id="earn-viewer" style="font-size:12px;color:var(--faint);margin-top:10px;">Sign in as Admin to log portfolio earnings.</div>
   </div>
 
-  <!-- PANEL C: Taxable income -->
+  <!-- PANEL C: Taxable income — fiscal YTD running log -->
   <div class="card" style="margin-bottom:14px;">
     <div class="card-hdr">
       <div>
         <div class="card-title">Panel C &#8212; Taxable income (Molly&#x27;s number)</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Dividends declared by the funds for IRS purposes. This is what Molly journals each month &#8212; <strong>not</strong> the same as what the portfolio actually earned.</div>
-        <div style="font-size:11px;color:var(--faint);margin-top:2px;">From your monthly WF statement &#8594; Combined Income Summary page &#8594; &#x201C;Total income on all accounts&#x201D; row (bottom row) &#8594; <strong>This Period</strong> column (that month only) and <strong>This Year</strong> column (calendar YTD &#8212; resets Jan 1)</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Dividends declared by the funds for IRS purposes &#8212; what Molly journals. Enter "This Period" each month after your statement arrives. The dashboard adds them up from July, giving you a true fiscal-year total.</div>
       </div>
     </div>
+
+    <!-- WHERE TO FIND IT -->
+    <div style="background:var(--bg);border-radius:8px;padding:12px 14px;margin:12px 0 14px;font-size:12px;color:var(--muted);line-height:1.8;">
+      <strong style="color:var(--ink);">Where to find it:</strong> Open your monthly WF statement &#8594; <strong style="color:var(--ink);">Combined Income Summary</strong> page &#8594; bottom row labeled <strong style="color:var(--ink);">"Total income on all accounts"</strong> &#8594; <strong style="color:var(--ink);">"This Period"</strong> column (that month only). Enter that one number here each month.<br>
+      <span style="font-size:11px;color:var(--faint);">The "This Year" column resets January 1 and does not match BRYC&#x27;s fiscal year &#8212; ignore it for fiscal tracking. Use this log instead.</span>
+    </div>
+
+    <!-- FISCAL YTD TOTAL — always visible -->
+    <div id="tax-ytd-display" style="display:none;background:var(--g6);border:.5px solid var(--g5);border-radius:8px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--g2);margin-bottom:6px;">Fiscal YTD taxable income (July&#8211;<span id="tax-ytd-thru">&#8212;</span>)</div>
+      <div style="font-size:26px;font-weight:800;color:var(--g2);" id="tax-ytd-total">&#8212;</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;" id="tax-ytd-months"></div>
+    </div>
+
+    <!-- MONTHLY LOG TABLE — always visible once populated -->
+    <div id="tax-log-table" style="margin-bottom:14px;"></div>
+
     <div id="tax-admin" style="display:none;">
-      <div class="apanel" style="margin-top:12px;">
+      <div class="apanel">
+        <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:10px;">Log a monthly entry</div>
         <div class="agrid">
-          <div class="af"><label>Statement month</label><select id="tax-mo" style="width:100%;padding:7px 10px;font-size:13px;border:.5px solid var(--rule);border-radius:6px;background:var(--white);font-family:proxima-nova,sans-serif;"><option value="">Select month</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option></select></div>
-          <div class="af"><label>Statement year</label><input id="tax-yr" type="number" placeholder="e.g. 2026"></div>
-          <div class="af"><label>"This Period" $ (that month only)</label><input id="tax-period" type="number" placeholder="e.g. 8420"></div>
-          <div class="af"><label>"This Year" $ (calendar YTD)</label><input id="tax-year" type="number" placeholder="e.g. 62300"></div>
+          <div class="af"><label>Statement month</label>
+            <select id="tax-mo" style="width:100%;padding:7px 10px;font-size:13px;border:.5px solid var(--rule);border-radius:6px;background:var(--white);font-family:proxima-nova,sans-serif;">
+              <option value="">Select month</option>
+              <option value="July">July</option><option value="August">August</option>
+              <option value="September">September</option><option value="October">October</option>
+              <option value="November">November</option><option value="December">December</option>
+              <option value="January">January</option><option value="February">February</option>
+              <option value="March">March</option><option value="April">April</option>
+              <option value="May">May</option><option value="June">June</option>
+            </select>
+          </div>
+          <div class="af"><label>Fiscal year (e.g. 2027 for FY July 2026&#8211;June 2027)</label><input id="tax-fy" type="number" placeholder="e.g. 2027" value="2027"></div>
+          <div class="af"><label>"This Period" $ &#8212; Total income on all accounts</label><input id="tax-period" type="number" placeholder="e.g. 7614.87"></div>
         </div>
-        <p style="font-size:11px;color:var(--amber);margin-top:8px;">&#9888; "This Year" resets every January 1 &#8212; it does not match BRYC&#x27;s fiscal year (July&#8211;June). For fiscal year totals, add "This Period" across July through June statements.</p>
-        <button class="abtn" onclick="saveTaxIncome()">Save taxable income</button><span class="saved" id="tax-saved">&#10003; Saved</span>
-        <div id="tax-log" style="margin-top:12px;font-size:12px;color:var(--muted);"></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:10px;">
+          <button class="abtn" onclick="saveTaxIncome()">Add month</button>
+          <span class="saved" id="tax-saved">&#10003; Added</span>
+        </div>
       </div>
     </div>
     <div id="tax-viewer" style="font-size:12px;color:var(--faint);margin-top:10px;">Sign in as Admin to log taxable income.</div>
@@ -1064,7 +1091,7 @@ let S={
   chase:834117,debt:67078,chaseDate:'',
   mm1:537731,mm2:1312012,endowment:1322973,eai:103627,invDate:'',
   expMonthly:[232893,254792,266483,332585,255230,234672,236984,266711,245901,314456,228487,187168],expFetchedAt:'seed',expManual:[null,null,null,null,null,null,null,null,null,null,null,null],
-  earnings:[],taxLog:[],
+  earnings:[],taxLog:[{mo:"July",fy:"2027",period:7232.66},{mo:"August",fy:"2027",period:7614.87}],
   pipelineFetchedAt:null,
   wfLog:[{dt:'2026-08-01',acct:'endowment',val:1426000,ytdD:108000,ytdP:9.43,stocks:62,bonds:20,alts:18,cashMv:100000,plan:'Investing last $100K Sept 7th',notes:'Averaged $400K into managed account over 4 months. $200K already invested, $100K added today. Account lost $2K since June 5th board report.'}],
   pledges:[
@@ -1154,16 +1181,80 @@ function saveEarnings(){
 }
 
 function saveTaxIncome(){
-  var e={mo:document.getElementById('tax-mo').value,yr:document.getElementById('tax-yr').value,period:+document.getElementById('tax-period').value||null,year:+document.getElementById('tax-year').value||null};
+  var mo=document.getElementById('tax-mo').value;
+  var fy=document.getElementById('tax-fy').value||'2027';
+  var period=+document.getElementById('tax-period').value||null;
+  if(!mo||!period) return;
   if(!S.taxLog) S.taxLog=[];
-  S.taxLog.unshift(e);
-  save();updateInvPage();flash('tax-saved');
-  var el=document.getElementById('tax-log');
-  if(el&&S.taxLog.length){
-    el.innerHTML='<strong>Last logged:</strong> '+S.taxLog[0].mo+' '+S.taxLog[0].yr
-      +(S.taxLog[0].period?' &nbsp;&#183;&nbsp; This Period: <strong>'+fmtF(S.taxLog[0].period)+'</strong>':'')
-      +(S.taxLog[0].year?' &nbsp;&#183;&nbsp; This Year: <strong>'+fmtF(S.taxLog[0].year)+'</strong>':'');
+  // Replace existing entry for same month+FY if it exists
+  var FY_ORDER=['July','August','September','October','November','December','January','February','March','April','May','June'];
+  var idx=S.taxLog.findIndex(function(e){return e.mo===mo&&e.fy===fy;});
+  var entry={mo:mo,fy:fy,period:period};
+  if(idx>=0) S.taxLog[idx]=entry;
+  else S.taxLog.push(entry);
+  // Sort by fiscal month order within same FY
+  S.taxLog.sort(function(a,b){
+    if(a.fy!==b.fy) return +a.fy - +b.fy;
+    return FY_ORDER.indexOf(a.mo)-FY_ORDER.indexOf(b.mo);
+  });
+  save();renderTaxLog();updateInvPage();flash('tax-saved');
+}
+
+function renderTaxLog(){
+  var FY_ORDER=['July','August','September','October','November','December','January','February','March','April','May','June'];
+  var tbl=document.getElementById('tax-log-table');
+  var ytdDiv=document.getElementById('tax-ytd-display');
+  if(!S.taxLog||!S.taxLog.length){if(tbl)tbl.innerHTML='';if(ytdDiv)ytdDiv.style.display='none';return;}
+  // Group by FY and compute totals
+  var fyGroups={};
+  S.taxLog.forEach(function(e){
+    if(!fyGroups[e.fy]) fyGroups[e.fy]=[];
+    fyGroups[e.fy].push(e);
+  });
+  // Find most recent FY
+  var fys=Object.keys(fyGroups).sort();
+  var latestFY=fys[fys.length-1];
+  var latestEntries=fyGroups[latestFY];
+  var latestTotal=latestEntries.reduce(function(s,e){return s+(e.period||0);},0);
+  var lastMo=latestEntries[latestEntries.length-1].mo;
+  // Update KPI card
+  if(ytdDiv){
+    ytdDiv.style.display='block';
+    safeSet('tax-ytd-total',fmtF(latestTotal));
+    safeSet('tax-ytd-thru',lastMo+' '+latestFY);
+    var moCount=latestEntries.length;
+    safeSet('tax-ytd-months',moCount+' month'+(moCount!==1?'s':'')+' logged (July–'+lastMo+') · FY'+latestFY);
   }
+  // Build table
+  if(tbl){
+    var rows=latestEntries.map(function(e,i){
+      var isAdm=document.body.getAttribute('data-role')==='admin';
+      var delBtn=isAdm?'<td style="padding:7px 12px;text-align:center;"><button class="tax-del-btn" data-mo="'+e.mo+'" data-fy="'+e.fy+'" style="background:none;border:none;color:var(--faint);cursor:pointer;font-size:12px;">✕</button></td>':'<td></td>';
+      return '<tr style="background:'+(i%2===0?'var(--bg)':'var(--white)')+';">'
+        +'<td style="padding:7px 12px;font-size:13px;font-weight:500;">'+e.mo+'</td>'
+        +'<td style="padding:7px 12px;font-size:13px;text-align:right;font-weight:600;color:var(--g2);">'+fmtF(e.period)+'</td>'
+        +delBtn
+        +'</tr>';
+    }).join('');
+    tbl.innerHTML='<table style="width:100%;border-collapse:collapse;border:.5px solid var(--rule);border-radius:6px;overflow:hidden;">'
+      +'<thead><tr style="background:var(--g1);">'
+      +'<th style="text-align:left;padding:8px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">Month (FY'+latestFY+')</th>'
+      +'<th style="text-align:right;padding:8px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;">This Period (taxable income)</th>'
+      +'<th style="width:40px;"></th>'
+      +'</tr></thead>'
+      +'<tbody>'+rows+'</tbody>'
+      +'<tfoot><tr style="background:var(--g1);">'
+      +'<td style="padding:8px 12px;font-size:12px;font-weight:700;color:#fff;">FY Total (July–'+lastMo+')</td>'
+      +'<td style="padding:8px 12px;font-size:14px;font-weight:800;color:#fff;text-align:right;">'+fmtF(latestTotal)+'</td>'
+      +'<td></td>'
+      +'</tr></tfoot>'
+      +'</table>';
+  }
+}
+
+function deleteTaxEntry(mo,fy){
+  S.taxLog=S.taxLog.filter(function(e){return!(e.mo===mo&&e.fy===fy);});
+  save();renderTaxLog();updateInvPage();
 }
 
 function saveWFLog(){
@@ -1284,15 +1375,16 @@ function updateInvPage(){
         +(endTotal?' &nbsp;Endowment this period: <strong>'+fmtF(endTotal)+'</strong>':'');
     }
   }
-  // Panel C: taxable income
-  var recentTax=S.taxLog&&S.taxLog.length?S.taxLog[0]:null;
-  if(recentTax&&recentTax.period){
-    safeSet('iv-tax-ytd',fmtF(recentTax.period));
-    safeSet('iv-tax-sub',(recentTax.mo&&recentTax.yr?recentTax.mo+' '+recentTax.yr+' — This Period':'Last logged'));
-    var taxLogEl=document.getElementById('tax-log');
-    if(taxLogEl) taxLogEl.innerHTML='<strong>Last logged:</strong> '+recentTax.mo+' '+recentTax.yr
-      +(recentTax.period?' &nbsp;&#183;&nbsp; This Period: <strong>'+fmtF(recentTax.period)+'</strong>':'')
-      +(recentTax.year?' &nbsp;&#183;&nbsp; This Year (calendar): <strong>'+fmtF(recentTax.year)+'</strong>':'');
+  // Panel C: taxable income — fiscal YTD total
+  renderTaxLog();
+  if(S.taxLog&&S.taxLog.length){
+    var FY_ORDER=['July','August','September','October','November','December','January','February','March','April','May','June'];
+    var fys={}; S.taxLog.forEach(function(e){if(!fys[e.fy])fys[e.fy]=[];fys[e.fy].push(e);});
+    var latestFY=Object.keys(fys).sort().pop();
+    var fyTotal=fys[latestFY].reduce(function(s,e){return s+(e.period||0);},0);
+    var lastMo=fys[latestFY][fys[latestFY].length-1].mo;
+    safeSet('iv-tax-ytd',fmtF(fyTotal));
+    safeSet('iv-tax-sub','FY'+latestFY+' July–'+lastMo+' · '+fys[latestFY].length+' months logged');
   }
   const c26=S.mm1+S.mm2, avg=(3010240+3006838+c26)/3;
   document.getElementById('ips-m1').textContent=fmtF(S.mm1);
@@ -1758,7 +1850,7 @@ function safeSet(id,val,prop){prop=prop||"textContent";var el=document.getElemen
 function initTooltips(){document.querySelectorAll(".tip-wrap").forEach(function(w){var icon=w.querySelector(".tip-icon"),box=w.querySelector(".tip-box");if(!icon||!box)return;icon.addEventListener("mouseenter",function(){var r=icon.getBoundingClientRect();box.style.left=Math.max(10,Math.min(r.left+r.width/2-130,window.innerWidth-272))+"px";box.style.top=(r.top-8)+"px";box.style.transform="translateY(-100%)";});});}
 
 function init(){
-  load(); refreshAll(); initCharts(); initTooltips(); initFCStartMonth();
+  load(); refreshAll(); initCharts(); initTooltips(); initFCStartMonth(); renderTaxLog();
   if(S.expMonthly&&S.expMonthly.length){
     var ts=S.expFetchedAt?new Date(S.expFetchedAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
     if(ts){safeSet('sync-exp-stat','✓ Last synced '+ts);safeSet('sync-exp-stat','var(--b2)','style.color');}
