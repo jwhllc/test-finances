@@ -1585,16 +1585,25 @@ function printSummary(){
   var remMonths=12-fyNow;var remSum=0;
   for(var i=0;i<remMonths;i++)remSum+=expenses[(fyNow+i)%12];
   var remBurn=Math.round(remSum/remMonths);
+  var annTotal=expenses.reduce(function(a,b){return a+b;},0);
   var netChase=S.chase-S.debt, liq=S.mm1+S.mm2;
-  var netLiq=netChase+liq;
+  var netLiq=netChase+liq, netAll=netChase+liq+S.endowment;
   var today=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   var curMo=FY_MOS[fyNow];
-  var mo3=FY_MOS[(fyNow+2)%12],mo6=FY_MOS[(fyNow+5)%12],moEnd=FY_MOS[11];
-  var w=window.open('','_blank','width=720,height=900');
-  w.document.write('<!DOCTYPE html><html><head><title>BRYC Financial Summary</title>'
+  var mo3=FY_MOS[(fyNow+2)%12], mo6=FY_MOS[(fyNow+5)%12];
+  // Runway figures
+  var r3liq=Math.max(0,netLiq/next3).toFixed(1);
+  var r3all=Math.max(0,netAll/next3).toFixed(1);
+  var r6liq=Math.max(0,netLiq/next6).toFixed(1);
+  var r6all=Math.max(0,netAll/next6).toFixed(1);
+  var rRemliq=Math.max(0,netLiq/remBurn).toFixed(1);
+  var rRemall=Math.max(0,netAll/remBurn).toFixed(1);
+  var w=window.open('','_blank','width=760,height=1000');
+  w.document.write('<!DOCTYPE html><html><head><title>BRYC Financial Summary \u2014 '+today+'</title>'
     +'<link rel="stylesheet" href="https://use.typekit.net/hte4vgd.css">'
     +'<style>'
-    +'*{box-sizing:border-box;margin:0;padding:0;} body{font-family:proxima-nova,sans-serif;color:#061b17;padding:48px;font-size:14px;}'
+    +'*{box-sizing:border-box;margin:0;padding:0;}'
+    +'body{font-family:proxima-nova,sans-serif;color:#061b17;padding:48px;font-size:14px;}'
     +'h1{font-size:22px;font-weight:800;color:#006b56;margin-bottom:4px;}'
     +'.sub{font-size:13px;color:#6b8f89;margin-bottom:32px;}'
     +'.section{margin-bottom:28px;}'
@@ -1604,41 +1613,66 @@ function printSummary(){
     +'.label{font-size:13px;color:#3a5c55;}'
     +'.value{font-size:16px;font-weight:700;color:#006b56;}'
     +'.value.blue{color:#0a52a9;}'
-    +'.value.gray{color:#6b8f89;}'
+    +'.value.gray{color:#8a9e9b;}'
     +'.total-row{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-top:2px solid #006b56;margin-top:4px;}'
     +'.total-label{font-size:13px;font-weight:700;}'
     +'.total-value{font-size:20px;font-weight:800;color:#006b56;}'
-    +'.runway-row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:.5px solid #e8f2f0;}'
-    +'.runway-mo{font-size:13px;color:#3a5c55;}'
-    +'.runway-burn{font-size:12px;color:#6b8f89;}'
-    +'.runway-val{font-size:16px;font-weight:700;color:#006b56;}'
-    +'.note{font-size:11px;color:#6b8f89;margin-top:24px;line-height:1.6;}'
-    +'@media print{body{padding:32px;} button{display:none;}}'
+    +'.total-row.all .total-value{color:#0a52a9;}'
+    +'.rw-table{width:100%;border-collapse:collapse;margin-top:4px;}'
+    +'.rw-table thead th{text-align:left;padding:7px 10px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;background:#006b56;}'
+    +'.rw-table thead th:not(:first-child){text-align:right;}'
+    +'.rw-table td{padding:9px 10px;font-size:13px;border-bottom:.5px solid #e8f2f0;vertical-align:top;}'
+    +'.rw-table td:not(:first-child){text-align:right;font-weight:700;}'
+    +'.rw-table td .burn{display:block;font-size:11px;color:#8a9e9b;font-weight:400;margin-top:2px;}'
+    +'.rw-table td.liq-col{color:#006b56;}'
+    +'.rw-table td.all-col{color:#0a52a9;}'
+    +'.rw-note{font-size:11px;color:#8a9e9b;margin-top:8px;line-height:1.6;}'
+    +'.budget-row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:.5px solid #e8f2f0;}'
+    +'.note{font-size:11px;color:#8a9e9b;margin-top:24px;line-height:1.6;}'
+    +'@media print{body{padding:32px;} .no-print{display:none;}}'
     +'</style></head><body>'
     +'<h1>BRYC Financial Summary</h1>'
-    +'<div class="sub">'+today+' &nbsp;|&nbsp; Prepared by Josh Howard, Chief of Staff</div>'
+    +'<div class="sub">As of '+today+' &nbsp;&middot;&nbsp; Prepared by Josh Howard, Chief of Staff</div>'
 
+    // ── Cash position ──────────────────────────────────────────────
     +'<div class="section">'
     +'<div class="section-title">Cash position</div>'
     +'<div class="row"><span class="label">Chase operating (net of debt)</span><span class="value">'+fmtF(netChase)+'</span></div>'
-    +'<div class="row"><span class="label">WF liquid reserves (1005-7413 + 8847-4912)</span><span class="value">'+fmtF(liq)+'</span></div>'
-    +'<div class="total-row"><span class="total-label">Total liquid</span><span class="total-value">'+fmtF(netLiq)+'</span></div>'
+    +'<div class="row"><span class="label">WF liquid reserves &mdash; 1005-7413 + 8847-4912</span><span class="value">'+fmtF(liq)+'</span></div>'
+    +'<div class="total-row"><span class="total-label">Total liquid cash</span><span class="total-value">'+fmtF(netLiq)+'</span></div>'
     +'</div>'
 
+    // ── Endowment ──────────────────────────────────────────────────
     +'<div class="section">'
     +'<div class="section-title">Endowment</div>'
-    +'<div class="row"><span class="label">WF endowment (8805-0682) &nbsp;<span style="font-size:11px;color:#6b8f89;">Board vote required to access</span></span><span class="value blue">'+fmtF(S.endowment)+'</span></div>'
+    +'<div class="row"><span class="label">WF endowment &mdash; 8805-0682</span><span class="value blue">'+fmtF(S.endowment)+'</span></div>'
+    +'<div class="total-row all"><span class="total-label">Total including endowment</span><span class="total-value">'+fmtF(netAll)+'</span></div>'
     +'</div>'
 
+    // ── Operating runway ───────────────────────────────────────────
     +'<div class="section">'
-    +'<div class="section-title">Operating runway &mdash; as of '+curMo+'</div>'
-    +'<div class="runway-row"><span><span class="runway-mo">Next 3 months (through '+mo3+')</span><br><span class="runway-burn">Avg monthly budget: '+fmtF(next3)+'</span></span><span class="runway-val">'+Math.max(0,(netLiq/next3)).toFixed(1)+' months</span></div>'
-    +'<div class="runway-row"><span><span class="runway-mo">Next 6 months (through '+mo6+')</span><br><span class="runway-burn">Avg monthly budget: '+fmtF(next6)+'</span></span><span class="runway-val">'+Math.max(0,(netLiq/next6)).toFixed(1)+' months</span></div>'
-    +'<div class="runway-row"><span><span class="runway-mo">Rest of fiscal year (through June)</span><br><span class="runway-burn">Avg monthly budget: '+fmtF(remBurn)+'</span></span><span class="runway-val">'+Math.max(0,(netLiq/remBurn)).toFixed(1)+' months</span></div>'
+    +'<div class="section-title">Operating runway &mdash; as of '+curMo+' (without raising additional revenue)</div>'
+    +'<table class="rw-table"><thead><tr>'
+    +'<th>Period</th><th>Avg monthly budget</th><th>Liquid only</th><th>Incl. endowment</th>'
+    +'</tr></thead><tbody>'
+    +'<tr><td>Next 3 months<span class="burn">through '+mo3+'</span></td><td>'+fmtF(next3)+'</td><td class="liq-col">'+r3liq+' mo</td><td class="all-col">'+r3all+' mo</td></tr>'
+    +'<tr><td>Next 6 months<span class="burn">through '+mo6+'</span></td><td>'+fmtF(next6)+'</td><td class="liq-col">'+r6liq+' mo</td><td class="all-col">'+r6all+' mo</td></tr>'
+    +'<tr><td>Rest of fiscal year<span class="burn">through June &mdash; '+remMonths+' months remaining</span></td><td>'+fmtF(remBurn)+'</td><td class="liq-col">'+rRemliq+' mo</td><td class="all-col">'+rRemall+' mo</td></tr>'
+    +'</tbody></table>'
+    +'<p class="rw-note">Runway = current cash &divide; avg monthly budget for that window. Liquid = Chase (net of debt) + WF reserves. Endowment column includes the board-designated account but accessing it requires a board vote.</p>'
     +'</div>'
 
-    +'<div class="note">Numbers reflect the most recent balances entered in the dashboard and FY27 operating budget. Runway is calculated as total liquid cash divided by average monthly budgeted expenses for each period. Endowment requires a board vote to access and is not included in liquid totals.</div>'
-    +'<br><button onclick="window.print()" style="padding:8px 20px;background:#006b56;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;">Print / Save as PDF</button>'
+    // ── FY27 Budget ────────────────────────────────────────────────
+    +'<div class="section">'
+    +'<div class="section-title">FY27 Operating budget</div>'
+    +'<div class="budget-row"><span class="label">Full-year budget total</span><span class="value">'+fmtF(annTotal)+'</span></div>'
+    +'<div class="budget-row"><span class="label">Monthly average (full year)</span><span class="value gray">'+fmtF(Math.round(annTotal/12))+'</span></div>'
+    +'<div class="budget-row"><span class="label">Months elapsed (July\u2013'+curMo+')</span><span class="value gray">'+fyNow+' of 12</span></div>'
+    +'<div class="budget-row"><span class="label">Budget to date (July\u2013'+curMo+')</span><span class="value gray">'+fmtF(expenses.slice(0,fyNow).reduce(function(a,b){return a+b;},0))+'</span></div>'
+    +'</div>'
+
+    +'<div class="note">Numbers reflect the most recent balances entered in the dashboard. Budget figures are from the FY27 Operating Budget sheet'+(S.expFetchedAt&&S.expFetchedAt!=="seed"?' (last synced '+new Date(S.expFetchedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+')':' (seed values — sync for live figures)')+'.</div>'
+    +'<br><button class="no-print" onclick="window.print()" style="padding:8px 20px;background:#006b56;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;margin-top:16px;">Print / Save as PDF</button>'
     +'</body></html>');
   w.document.close();
 }
