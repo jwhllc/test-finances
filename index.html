@@ -1141,26 +1141,38 @@ let S={
 };
 
 function save(){try{localStorage.setItem('bryc_v3',JSON.stringify(S));}catch(e){}}
-function load(){try{const d=JSON.parse(localStorage.getItem('bryc_v3'));if(d){const{pledges:sp,wfLog:wl,...rest}=d;Object.assign(S,rest);if(sp&&sp.length>0)S.pledges=sp;if(wl&&wl.length>0)S.wfLog=wl;if(d.expManual)S.expManual=d.expManual;if(d.earnings)S.earnings=d.earnings;
-    // Migrate old taxLog entries that lack fy field
-    if(d.taxLog){
-      S.taxLog=d.taxLog.map(function(e){return e.fy?e:Object.assign({},e,{fy:'2027'});});
-    }}
-// Always ensure July FY2027 is in the log — merge, don't overwrite
+function load(){
+  try{
+    var d=JSON.parse(localStorage.getItem('bryc_v3'));
+    if(d){
+      var sp=d.pledges,wl=d.wfLog;
+      var rest={};
+      Object.keys(d).forEach(function(k){if(k!=='pledges'&&k!=='wfLog')rest[k]=d[k];});
+      Object.assign(S,rest);
+      if(sp&&sp.length>0)S.pledges=sp;
+      if(wl&&wl.length>0)S.wfLog=wl;
+      if(d.expManual)S.expManual=d.expManual;
+      if(d.earnings)S.earnings=d.earnings;
+      if(d.taxLog){
+        S.taxLog=d.taxLog.map(function(e){return e.fy?e:Object.assign({},e,{fy:'2027'});});
+      }
+    }
+  }catch(e){}
+}
+
 function seedTaxIfEmpty(){
+  var FY_ORDER=['July','August','September','October','November','December','January','February','March','April','May','June'];
   if(!S.taxLog) S.taxLog=[];
   var hasJuly=S.taxLog.some(function(e){return e.mo==='July'&&e.fy==='2027';});
   if(!hasJuly){
     S.taxLog.push({mo:'July',fy:'2027',period:7232.66});
-    // Re-sort by fiscal month order
-    var FY_ORDER=['July','August','September','October','November','December','January','February','March','April','May','June'];
     S.taxLog.sort(function(a,b){
       if(a.fy!==b.fy) return +a.fy - +b.fy;
       return FY_ORDER.indexOf(a.mo)-FY_ORDER.indexOf(b.mo);
     });
     save();
   }
-}}catch(e){}}
+}
 function flash(id){const e=document.getElementById(id);e.style.display='inline';setTimeout(()=>e.style.display='none',2000);}
 
 // ── AUTH ──────────────────────────────────────────────────────────────
