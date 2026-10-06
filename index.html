@@ -480,9 +480,9 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
     <div id="inv-admin" style="display:none;">
       <div class="apanel" style="margin-top:12px;">
         <div class="agrid">
-          <div class="af"><label>1005-7413 EBR reserve ($)</label><input id="a-mm1" type="number" placeholder="e.g. 537731"></div>
-          <div class="af"><label>8847-4912 yield reserve ($)</label><input id="a-mm2" type="number" placeholder="e.g. 1312012"></div>
-          <div class="af"><label>8805-0682 endowment ($)</label><input id="a-end" type="number" placeholder="e.g. 1322973"></div>
+          <div class="af"><label>1005-7413 EBR reserve ($)</label><input id="a-mm1" type="number" placeholder="e.g. 544229"></div>
+          <div class="af"><label>8847-4912 yield reserve ($)</label><input id="a-mm2" type="number" placeholder="e.g. 1127053"></div>
+          <div class="af"><label>8805-0682 endowment ($)</label><input id="a-end" type="number" placeholder="e.g. 1492757"></div>
           <div class="af"><label>As-of date</label><input id="a-inv-dt" type="date"></div>
         </div>
         <button class="abtn" onclick="saveInv()">Save balances</button><span class="saved" id="inv-saved">&#10003; Saved</span>
@@ -1161,12 +1161,32 @@ function load(){
   }catch(e){}
 }
 
+function seedEarningsIfStale(){
+  // If no earnings logged yet, or most recent entry is before Sep 2026, inject September
+  var sepEntry={dt:'2026-09-30',liq:{src:'statement',dt:'2026-09-30',mm1p:1545.29,mm1y:16343.84,mm2p:3301.37,mm2y:36013.29},end:{src:'statement',dt:'2026-09-30',period:-25627.84,year:78890.28,pct:null,val:1492757.33}};
+  if(!S.earnings||S.earnings.length===0){
+    S.earnings=[sepEntry];save();return;
+  }
+  // Check if Sep 2026 already logged
+  var hasSep=S.earnings.some(function(e){return e.dt==='2026-09-30';});
+  if(!hasSep){S.earnings.unshift(sepEntry);save();}
+}
+
 function seedTaxIfEmpty(){
   var FY_ORDER=['July','August','September','October','November','December','January','February','March','April','May','June'];
   if(!S.taxLog) S.taxLog=[];
-  var hasJuly=S.taxLog.some(function(e){return e.mo==='July'&&e.fy==='2027';});
-  if(!hasJuly){
-    S.taxLog.push({mo:'July',fy:'2027',period:7232.66});
+  // Ensure all three seeded months are present — merge, never overwrite existing entries
+  var seeds=[
+    {mo:'July',fy:'2027',period:7232.66},
+    {mo:'August',fy:'2027',period:7614.87},
+    {mo:'September',fy:'2027',period:9686.96}
+  ];
+  var changed=false;
+  seeds.forEach(function(seed){
+    var exists=S.taxLog.some(function(e){return e.mo===seed.mo&&e.fy===seed.fy;});
+    if(!exists){S.taxLog.push(seed);changed=true;}
+  });
+  if(changed){
     S.taxLog.sort(function(a,b){
       if(a.fy!==b.fy) return +a.fy - +b.fy;
       return FY_ORDER.indexOf(a.mo)-FY_ORDER.indexOf(b.mo);
@@ -1941,7 +1961,7 @@ function safeSet(id,val,prop){prop=prop||"textContent";var el=document.getElemen
 function initTooltips(){document.querySelectorAll(".tip-wrap").forEach(function(w){var icon=w.querySelector(".tip-icon"),box=w.querySelector(".tip-box");if(!icon||!box)return;icon.addEventListener("mouseenter",function(){var r=icon.getBoundingClientRect();box.style.left=Math.max(10,Math.min(r.left+r.width/2-130,window.innerWidth-272))+"px";box.style.top=(r.top-8)+"px";box.style.transform="translateY(-100%)";});});}
 
 function init(){
-  load(); seedTaxIfEmpty(); refreshAll(); initCharts(); initTooltips(); initFCStartMonth(); renderTaxLog();
+  load(); seedTaxIfEmpty(); seedEarningsIfStale(); refreshAll(); initCharts(); initTooltips(); initFCStartMonth(); renderTaxLog();
   if(S.expMonthly&&S.expMonthly.length){
     var ts=S.expFetchedAt?new Date(S.expFetchedAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
     if(ts){safeSet('sync-exp-stat','✓ Last synced '+ts);safeSet('sync-exp-stat','var(--b2)','style.color');}
