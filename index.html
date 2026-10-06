@@ -335,7 +335,15 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-he
     <div class="card">
       <div class="card-hdr">
         <div class="card-title">Operating runway</div>
-        <button onclick="printSummary()" style="padding:5px 14px;background:var(--g2);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;">Print summary</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <select id="print-preparer" style="padding:5px 10px;font-size:12px;border:.5px solid var(--rule);border-radius:6px;background:var(--white);color:var(--ink);font-family:proxima-nova,sans-serif;">
+            <option value="Josh Howard, CEO Designate">Josh Howard, CEO Designate</option>
+            <option value="Myeisha Anderson, Deputy Chief of Staff">Myeisha Anderson, Deputy Chief of Staff</option>
+            <option value="Elin Hawkinson, Chief of Product">Elin Hawkinson, Chief of Product</option>
+            <option value="Lucas Spielfogel, CEO">Lucas Spielfogel, CEO</option>
+          </select>
+          <button onclick="printSummary()" style="padding:5px 14px;background:var(--g2);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:proxima-nova,sans-serif;">Print summary</button>
+        </div>
       </div>
       <div class="runway-wrap">
         <div class="runway-bars">
@@ -1609,6 +1617,8 @@ function printSummary(){
   var netChase=S.chase-S.debt, liq=S.mm1+S.mm2;
   var netLiq=netChase+liq, netAll=netChase+liq+S.endowment;
   var today=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  var preparerEl=document.getElementById('print-preparer');
+  var preparer=preparerEl?preparerEl.value:'Josh Howard, CEO Designate';
   var curMo=FY_MOS[fyNow];
   var mo3=FY_MOS[(fyNow+2)%12], mo6=FY_MOS[(fyNow+5)%12];
   // Runway figures
@@ -1652,7 +1662,7 @@ function printSummary(){
     +'@media print{body{padding:32px;} .no-print{display:none;}}'
     +'</style></head><body>'
     +'<h1>BRYC Financial Summary</h1>'
-    +'<div class="sub">As of '+today+' &nbsp;&middot;&nbsp; Prepared by Josh Howard, Chief of Staff</div>'
+    +'<div class="sub">As of '+today+' &nbsp;&middot;&nbsp; Prepared by '+preparer+'</div>'
 
     // ── Cash position ──────────────────────────────────────────────
     +'<div class="section">'
